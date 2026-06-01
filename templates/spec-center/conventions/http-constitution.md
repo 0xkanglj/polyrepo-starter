@@ -157,13 +157,13 @@ Idempotency-Key: <uuid>
 
 > 目标：统一时间表达、存储与传输，避免跨时区与序列化问题
 
-**核心原则（强制）：** 统一使用 Asia/Kuala_Lumpur (UTC+8) | API 使用 ISO 8601 | 数据库存 TIMESTAMPTZ | 严禁时区歧义
+**核心原则（强制）：** 统一使用 UTC | API 使用 ISO 8601 以 `Z` 结尾，推荐含毫秒 | 数据库存 TIMESTAMPTZ | 严禁时区歧义
 
 ### API 时间格式（强制）
 
-格式：`YYYY-MM-DDTHH:mm:ss[.SSS]+08:00`，统一 UTC+8（`+08:00` 结尾），推荐含毫秒
+格式：`YYYY-MM-DDTHH:mm:ss[.SSS]Z`，统一 UTC（`Z` 结尾），推荐含毫秒
 
-✅ `"createdAt": "2026-03-30T20:00:00.123+08:00"`
+✅ `"createdAt": "2026-03-30T20:00:00.123Z"`
 ❌ `"2026-03-30 12:00:00"` | `"03/30/2026"` | `1711800000`（默认禁止时间戳）
 
 **字段命名：** createdAt(创建) | updatedAt(更新) | deletedAt(删除)
@@ -188,7 +188,7 @@ created_at DATETIME(3) NOT NULL
 updated_at DATETIME(3) NOT NULL
 ```
 
-- 应用层使用 `pkg/timeutil.Now()`（UTC+8）、数据库连接 `SET TIMEZONE 'Asia/Kuala_Lumpur'`
+- 应用层使用 `time.Now().UTC()`、数据库连接 `SET TIMEZONE 'UTC'`
 - 不推荐 `TIMESTAMP`（自动时区转换行为不一致、范围限制 1970~2038、隐式行为多）
 
 **对比：**
@@ -201,11 +201,11 @@ updated_at DATETIME(3) NOT NULL
 
 ### 时间流转（端到端）
 
-数据库(UTC+8 session) → 后端(UTC+8 via timeutil) → API(ISO 8601 +08:00) → 前端(直接使用)
+数据库(UTC session) → 后端(time.Now().UTC()) → API(ISO 8601 Z) → 前端(直接使用)
 
 ### 请求体时间
 
-必须：`"startAt": "2026-03-30T20:00:00+08:00"` ❌ `"2026-03-30 12:00:00"`
+必须：`"startAt": "2026-03-30T20:00:00Z"` ❌ `"2026-03-30 12:00:00"`
 
 ### 排序与分页
 
@@ -219,14 +219,14 @@ updated_at DATETIME(3) NOT NULL
 ### 禁止
 
 - ❌ 存储本地时间（如 `2026-03-30 12:00:00`）
-- ❌ API 返回不含时区偏移的时间（如裸 `Z` 或无偏移）
+- ❌ API 返回不含时区偏移的时间（如无偏移的 `2026-03-30T12:00:00`）
 - ❌ 混用时间格式
 
 ### 一句话规范
 
-**API：ISO 8601 +08:00（Asia/Kuala_Lumpur）** | **PostgreSQL：timestamptz + SET TIMEZONE 'Asia/Kuala_Lumpur'** | **MySQL：DATETIME(3) + 应用保证 UTC**
+**API：ISO 8601 Z（UTC）** | **PostgreSQL：timestamptz + SET TIMEZONE 'UTC'** | **MySQL：DATETIME(3) + 应用保证 UTC**
 
-> 所有时间字段统一使用 Asia/Kuala_Lumpur (UTC+8) 时区。PostgreSQL 使用 `TIMESTAMP WITH TIME ZONE` 并设置会话时区；API 层统一使用 ISO 8601 `+08:00` 格式。后端通过 `pkg/timeutil` 包统一管理时区。
+> 统一使用 UTC。PostgreSQL 使用 `TIMESTAMP WITH TIME ZONE` 并设置会话时区为 UTC；API 层统一使用 ISO 8601 `Z` 格式。
 
 ## 十六、上线 Checklist
 
