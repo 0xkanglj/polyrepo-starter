@@ -107,5 +107,5 @@ if find "$ORIGINAL_DIR" -maxdepth 1 -type d -name '*-spec-center' 2>/dev/null | 
 else
   echo "Creating new workspace..."
   build_init_flags
-  node "$TEMP_DIR/src/cli.js" init --templates-dir "$TEMP_DIR/templates" "${INIT_FLAGS[@]}" "$@"
+  node "$TEMP_DIR/src/cli.js" init --templates-dir "$TEMP_DIR/templates" "${INIT_FLAGS[@]+"${INIT_FLAGS[@]}"}" "$@"
 fi
