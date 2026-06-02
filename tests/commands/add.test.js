@@ -76,4 +76,40 @@ describe('add command integration', () => {
       expect(err.stderr?.toString() || err.message).toContain('Not in a workspace');
     }
   });
+
+  it('fails with invalid custom module format', () => {
+    try {
+      execSync(
+        `node "${CLI_PATH}" add -c invalidformat --templates-dir "${TEMPLATES_DIR}"`,
+        { cwd: workspaceDir, stdio: 'pipe' }
+      );
+      expect.unreachable('Should have thrown');
+    } catch (err) {
+      expect(err.stderr?.toString() || err.message).toContain('Invalid custom module format');
+    }
+  });
+
+  it('fails with non-existent template ref', () => {
+    try {
+      execSync(
+        `node "${CLI_PATH}" add -c mymod:nonexistent --templates-dir "${TEMPLATES_DIR}"`,
+        { cwd: workspaceDir, stdio: 'pipe' }
+      );
+      expect.unreachable('Should have thrown');
+    } catch (err) {
+      expect(err.stderr?.toString() || err.message).toContain('Reference template not found');
+    }
+  });
+
+  it('fails with invalid custom module name', () => {
+    try {
+      execSync(
+        `node "${CLI_PATH}" add -c "INVALID:server" --templates-dir "${TEMPLATES_DIR}"`,
+        { cwd: workspaceDir, stdio: 'pipe' }
+      );
+      expect.unreachable('Should have thrown');
+    } catch (err) {
+      expect(err.stderr?.toString() || err.message).toContain('Invalid custom module name');
+    }
+  });
 });

@@ -1,5 +1,17 @@
 import chalk from 'chalk';
 
+let verbose = false;
+
+export function setVerbose(value) {
+  verbose = value;
+}
+
+export function debug(message) {
+  if (verbose) {
+    console.log(chalk.gray(`[DEBUG] ${message}`));
+  }
+}
+
 export function info(message) {
   console.log(chalk.cyan(`[INFO] ${message}`));
 }
@@ -14,6 +26,11 @@ export function error(message) {
 
 export function success(message) {
   console.log(chalk.green(`[OK] ${message}`));
+}
+
+export function moduleLabel(projectName, mod) {
+  const suffix = mod.isCustom ? ` (based on ${mod.templateRef})` : '';
+  return `${projectName}-${mod.name}${suffix}`;
 }
 
 export function printDryRun(workspaceDir, projectName, modules) {
@@ -31,9 +48,7 @@ export function printDryRun(workspaceDir, projectName, modules) {
   console.log(`  ${workspaceDir}/.claude/`);
   console.log(`  ${workspaceDir}/.opencode/`);
   for (const mod of modules) {
-    const dirName = `${projectName}-${mod.name}`;
-    const suffix = mod.isCustom ? ` (based on ${mod.templateRef})` : '';
-    console.log(`  ${workspaceDir}/${dirName}/${suffix}`);
+    console.log(`  ${workspaceDir}/${moduleLabel(projectName, mod)}/`);
   }
   console.log('');
   info('=== END DRY RUN ===');
@@ -49,8 +64,7 @@ export function printSummary(workspaceDir, projectName, modules, action = 'creat
   console.log(`  Project  : ${projectName}`);
   console.log(`  Modules  :`);
   for (const mod of modules) {
-    const suffix = mod.isCustom ? ` (based on ${mod.templateRef})` : '';
-    console.log(`              ${projectName}-${mod.name}/${suffix}`);
+    console.log(`              ${moduleLabel(projectName, mod)}/`);
   }
   console.log('');
   if (action === 'created') {

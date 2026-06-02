@@ -7,8 +7,15 @@ const DEFAULT_TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 let globalTemplatesDir = null;
 
+export const SPEC_CENTER_NAME = 'spec-center';
+export const SPEC_CENTER_SUFFIX = '-spec-center';
+
 export function setGlobalTemplatesDir(dir) {
   globalTemplatesDir = dir;
+}
+
+export function resetGlobalTemplatesDir() {
+  globalTemplatesDir = null;
 }
 
 export function getGlobalTemplatesDir() {
@@ -41,5 +48,5 @@ export function validateProjectName(name) {
 
 export function extractProjectName(specCenterDir) {
   const dirName = basename(specCenterDir);
-  return dirName.replace(/-spec-center$/, '');
+  return dirName.slice(0, -SPEC_CENTER_SUFFIX.length);
 }

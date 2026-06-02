@@ -1,8 +1,13 @@
 import { cpSync, readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, basename, extname } from 'path';
 import { globSync } from 'glob';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
+import ora from 'ora';
 import { resolveTemplatesDir } from '../utils/path.js';
+
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 const TEXT_FILE_EXTENSIONS = new Set([
   '.md', '.txt', '.json', '.yaml', '.yml', '.toml',
@@ -19,13 +24,17 @@ function isTextFile(filePath) {
 }
 
 export function mkdirIfNeeded(dirPath) {
-  if (!existsSync(dirPath)) {
-    mkdirSync(dirPath, { recursive: true });
-  }
+  mkdirSync(dirPath, { recursive: true });
 }
 
 export function copyAndReplace(templateName, targetDir, vars) {
+  if (!vars || !vars.PROJECT) {
+    throw new Error('copyAndReplace requires vars.PROJECT to be set');
+  }
   const srcDir = resolveTemplatesDir(templateName);
+  if (!existsSync(srcDir)) {
+    throw new Error(`Template not found: "${templateName}" (looked in ${srcDir})`);
+  }
   cpSync(srcDir, targetDir, { recursive: true });
 
   const files = globSync('**/*', { cwd: targetDir, nodir: true, dot: true });
@@ -38,7 +47,7 @@ export function copyAndReplace(templateName, targetDir, vars) {
 
     if (vars.MODULE_NAME && vars.TEMPLATE_REF) {
       content = content.replace(
-        new RegExp(`-${vars.TEMPLATE_REF}\\b`, 'g'),
+        new RegExp(`-${escapeRegExp(vars.TEMPLATE_REF)}\\b`, 'g'),
         `-${vars.MODULE_NAME}`
       );
     }
@@ -48,11 +57,32 @@ export function copyAndReplace(templateName, targetDir, vars) {
 }
 
 export function gitInit(modDir, moduleName) {
-  execSync('git init', { cwd: modDir, stdio: 'pipe' });
-  execSync('git branch -M main', { cwd: modDir, stdio: 'pipe' });
-  execSync('git add .', { cwd: modDir, stdio: 'pipe' });
-  execSync(`git commit -m "chore: initialize ${moduleName} from scaffold"`, {
-    cwd: modDir,
-    stdio: 'pipe',
-  });
+  try {
+    execSync('git init', { cwd: modDir, stdio: 'pipe' });
+    execSync('git branch -M main', { cwd: modDir, stdio: 'pipe' });
+    execSync('git add .', { cwd: modDir, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', `chore: initialize ${moduleName} from scaffold`], {
+      cwd: modDir,
+      stdio: 'pipe',
+    });
+  } catch (err) {
+    throw new Error(`Failed to initialize git repo for "${moduleName}": ${err.message}`);
+  }
+}
+
+export function createModule(templateRef, modDir, projectName, mod) {
+  const label = `${projectName}-${mod.name}`;
+  const spinner = ora(`Creating ${label}...`).start();
+  try {
+    copyAndReplace(templateRef, modDir, {
+      PROJECT: projectName,
+      MODULE_NAME: mod.isCustom ? mod.name : null,
+      TEMPLATE_REF: mod.isCustom ? mod.templateRef : null,
+    });
+    gitInit(modDir, mod.name);
+    spinner.succeed(`Created ${label}`);
+  } catch (err) {
+    spinner.fail(`Failed to create ${label}`);
+    throw err;
+  }
 }

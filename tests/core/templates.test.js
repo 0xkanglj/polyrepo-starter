@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { getAvailableTemplateNames, getModuleRole, validateTemplate } from '../../src/core/templates.js';
-import { setGlobalTemplatesDir } from '../../src/utils/path.js';
+import { setGlobalTemplatesDir, resetGlobalTemplatesDir } from '../../src/utils/path.js';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -10,6 +10,10 @@ const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 describe('templates', () => {
   beforeEach(() => {
     setGlobalTemplatesDir(TEMPLATES_DIR);
+  });
+
+  afterEach(() => {
+    resetGlobalTemplatesDir();
   });
 
   describe('getAvailableTemplateNames', () => {
@@ -27,7 +31,7 @@ describe('templates', () => {
   describe('getModuleRole', () => {
     it('returns Role from server template', () => {
       const role = getModuleRole('server');
-      expect(role).toBe('Backend service implementation');
+      expect(role).toBe('Server application');
     });
 
     it('returns Role from web template', () => {

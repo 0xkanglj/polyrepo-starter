@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { expandHome, validateProjectName, extractProjectName } from '../../src/utils/path.js';
+import { expandHome, validateProjectName, extractProjectName, resetGlobalTemplatesDir } from '../../src/utils/path.js';
 import { homedir } from 'os';
 import { resolve } from 'path';
 
@@ -34,31 +34,31 @@ describe('validateProjectName', () => {
   });
 
   it('rejects names starting with digit', () => {
-    expect(validateProjectName('1project')).not.toBe(true);
+    expect(validateProjectName('1project')).toBe('Must start with lowercase letter, only lowercase/digits/hyphens');
   });
 
   it('rejects uppercase letters', () => {
-    expect(validateProjectName('Acme')).not.toBe(true);
+    expect(validateProjectName('Acme')).toBe('Must start with lowercase letter, only lowercase/digits/hyphens');
   });
 
   it('rejects underscores', () => {
-    expect(validateProjectName('my_project')).not.toBe(true);
+    expect(validateProjectName('my_project')).toBe('Must start with lowercase letter, only lowercase/digits/hyphens');
   });
 
   it('rejects names shorter than 2 characters', () => {
-    expect(validateProjectName('a')).not.toBe(true);
+    expect(validateProjectName('a')).toBe('Must be 2-50 characters');
   });
 
   it('rejects names longer than 50 characters', () => {
-    expect(validateProjectName('a'.repeat(51))).not.toBe(true);
+    expect(validateProjectName('a'.repeat(51))).toBe('Must be 2-50 characters');
   });
 
   it('rejects trailing hyphen', () => {
-    expect(validateProjectName('project-')).not.toBe(true);
+    expect(validateProjectName('project-')).toBe('Must start with lowercase letter, only lowercase/digits/hyphens');
   });
 
   it('rejects consecutive hyphens', () => {
-    expect(validateProjectName('my--project')).not.toBe(true);
+    expect(validateProjectName('my--project')).toBe('Must start with lowercase letter, only lowercase/digits/hyphens');
   });
 
   it('accepts exactly 2 characters', () => {

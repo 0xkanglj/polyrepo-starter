@@ -1,22 +1,24 @@
 import path from 'path';
 import fs from 'fs';
-import ora from 'ora';
 import {
   expandHome,
   validateProjectName,
   extractProjectName,
+  SPEC_CENTER_SUFFIX,
+  SPEC_CENTER_NAME,
 } from '../utils/path.js';
-import { promptAddModules, parseModuleList } from '../utils/prompt.js';
-import { copyAndReplace, gitInit } from '../core/scaffold.js';
+import { promptAddModules, parseModuleList, promptCustomModule } from '../utils/prompt.js';
+import { createModule } from '../core/scaffold.js';
 import { mergeAgentsMd } from '../core/agents-sync.js';
 import { getAvailableTemplateNames, validateTemplate } from '../core/templates.js';
+import { confirm } from '@inquirer/prompts';
 import {
-  error as logError,
   info,
   warn,
-  success,
   printSummary,
+  moduleLabel,
 } from '../utils/logger.js';
+import { CommandError } from '../utils/errors.js';
 
 /**
  * 向上遍历父目录，查找 *-spec-center/ 目录
@@ -31,7 +33,7 @@ export function findSpecCenter(startDir) {
         .readdirSync(dir)
         .filter(
           (name) =>
-            name.endsWith('-spec-center') &&
+            name.endsWith(SPEC_CENTER_SUFFIX) &&
             fs.statSync(path.join(dir, name)).isDirectory()
         );
       if (matches.length > 0) return path.join(dir, matches[0]);
@@ -60,6 +62,31 @@ export function scanExistingModules(workspaceDir, projectName) {
 }
 
 /**
+ * 解析 -c 参数的自定义模块
+ */
+function parseCustomModules(customArgs, allTemplateNames) {
+  const customs = Array.isArray(customArgs) ? customArgs : [customArgs];
+  const modules = [];
+  for (const c of customs) {
+    const [name, ref] = c.split(':');
+    if (!name || !ref) {
+      throw new CommandError(`Invalid custom module format: "${c}". Use name:ref (e.g. crawler:server)`);
+    }
+    const nameValidation = validateProjectName(name);
+    if (nameValidation !== true) {
+      throw new CommandError(`Invalid custom module name "${name}": ${nameValidation}`);
+    }
+    try {
+      validateTemplate(ref);
+    } catch {
+      throw new CommandError(`Reference template not found: "${ref}". Available: ${allTemplateNames.join(', ')}`);
+    }
+    modules.push({ name, templateRef: ref, isCustom: true });
+  }
+  return modules;
+}
+
+/**
  * add 子命令：追加模块到已有 workspace
  * @param {object} options - Commander 解析的选项
  */
@@ -70,11 +97,9 @@ export async function addCommand(options) {
     // 1. 检测 workspace
     const specCenterDir = findSpecCenter(cwd);
     if (!specCenterDir) {
-      logError(
+      throw new CommandError(
         'Not in a workspace directory. No *-spec-center/ found in current or parent directories.'
       );
-      info('Usage: cd <workspace-dir> && node src/cli.js add');
-      process.exit(1);
     }
 
     const workspaceDir = path.dirname(specCenterDir);
@@ -99,36 +124,20 @@ export async function addCommand(options) {
     } else {
       if (available.length === 0) {
         info('All standard modules are already installed.');
-        toAdd = [];
+        const addCustom = await confirm({ message: 'Add a custom module?', default: true });
+        if (addCustom) {
+          const customs = await promptCustomModule();
+          toAdd = customs;
+        } else {
+          toAdd = [];
+        }
       } else {
         toAdd = await promptAddModules(available);
       }
     }
 
-    // 处理 -c 参数的自定义模块
     if (options.custom) {
-      const customs = Array.isArray(options.custom)
-        ? options.custom
-        : [options.custom];
-      for (const c of customs) {
-        const [name, ref] = c.split(':');
-        if (!name || !ref) {
-          logError(`Invalid custom module format: "${c}". Use name:ref (e.g. crawler:server)`);
-          process.exit(1);
-        }
-        const nameValidation = validateProjectName(name);
-        if (nameValidation !== true) {
-          logError(`Invalid custom module name "${name}": ${nameValidation}`);
-          process.exit(1);
-        }
-        try {
-          validateTemplate(ref);
-        } catch {
-          logError(`Reference template not found: "${ref}". Available: ${allTemplateNames.join(', ')}`);
-          process.exit(1);
-        }
-        toAdd.push({ name, templateRef: ref, isCustom: true });
-      }
+      toAdd.push(...parseCustomModules(options.custom, allTemplateNames));
     }
 
     // 3. 跳过已存在的模块
@@ -148,8 +157,7 @@ export async function addCommand(options) {
     // 4. Dry run
     if (options.dryRun) {
       for (const mod of filtered) {
-        const suffix = mod.isCustom ? ` (based on ${mod.templateRef})` : '';
-        console.log(`  Would create: ${projectName}-${mod.name}/${suffix}`);
+        console.log(`  Would create: ${moduleLabel(projectName, mod)}/`);
       }
       return;
     }
@@ -157,14 +165,7 @@ export async function addCommand(options) {
     // 5. 创建新模块
     for (const mod of filtered) {
       const modDir = path.join(workspaceDir, `${projectName}-${mod.name}`);
-      const spinner = ora(`Creating ${projectName}-${mod.name}...`).start();
-      copyAndReplace(mod.templateRef, modDir, {
-        PROJECT: projectName,
-        MODULE_NAME: mod.isCustom ? mod.name : null,
-        TEMPLATE_REF: mod.isCustom ? mod.templateRef : null,
-      });
-      gitInit(modDir, mod.name);
-      spinner.succeed(`Created ${projectName}-${mod.name}`);
+      createModule(mod.templateRef, modDir, projectName, mod);
     }
 
     // 6. 增量 merge AGENTS.md
@@ -176,6 +177,7 @@ export async function addCommand(options) {
       info('Aborted.');
       return;
     }
-    throw err;
+    if (err instanceof CommandError) throw err;
+    throw new CommandError(`add failed: ${err.message}`);
   }
 }

@@ -1,6 +1,7 @@
 import { input, checkbox, confirm } from '@inquirer/prompts';
-import { validateProjectName } from './path.js';
+import { validateProjectName, SPEC_CENTER_NAME } from './path.js';
 import { getAvailableTemplateNames, validateTemplate } from '../core/templates.js';
+import { warn } from './logger.js';
 
 /**
  * 交互式输入项目名
@@ -38,9 +39,9 @@ export async function promptModules() {
   const available = getAvailableTemplateNames();
   const choices = [
     ...available.map(name => ({
-      name: name === 'spec-center' ? `${name} (required)` : name,
+      name: name === SPEC_CENTER_NAME ? `${name} (required)` : name,
       value: name,
-      disabled: name === 'spec-center',
+      disabled: name === SPEC_CENTER_NAME,
     })),
     { name: '+ Custom module...', value: '__custom__' },
   ];
@@ -49,7 +50,7 @@ export async function promptModules() {
     message: 'Select modules:',
     choices,
     required: true,
-    initialValues: ['spec-center'],
+    initialValues: [SPEC_CENTER_NAME],
   });
 
   const modules = [];
@@ -98,7 +99,7 @@ export async function promptAddModules(available) {
  * 交互式输入自定义模块信息
  * @returns {Promise<Array<{name: string, templateRef: string, isCustom: boolean}>>}
  */
-async function promptCustomModule() {
+export async function promptCustomModule() {
   const customs = [];
   let addAnother = true;
 
@@ -112,7 +113,7 @@ async function promptCustomModule() {
       },
     });
 
-    const templates = getAvailableTemplateNames().filter(t => t !== 'spec-center');
+    const templates = getAvailableTemplateNames().filter(t => t !== SPEC_CENTER_NAME);
     const templateRef = await checkbox({
       message: 'Reference template:',
       choices: templates.map(t => ({ name: t, value: t })),
@@ -135,8 +136,14 @@ async function promptCustomModule() {
  * @returns {Array<{name: string, templateRef: string, isCustom: boolean}>}
  */
 export function parseModuleList(moduleStr) {
-  return moduleStr.split(',').map(s => {
-    const name = s.trim();
-    return { name, templateRef: name, isCustom: false };
-  });
+  return moduleStr.split(',')
+    .map(s => s.trim())
+    .filter(name => {
+      if (!name) {
+        warn('Empty module name in list, skipping');
+        return false;
+      }
+      return true;
+    })
+    .map(name => ({ name, templateRef: name, isCustom: false }));
 }

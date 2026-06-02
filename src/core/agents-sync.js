@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { getModuleRole } from './templates.js';
-import { resolveTemplatesDir } from '../utils/path.js';
+import { resolveTemplatesDir, SPEC_CENTER_SUFFIX } from '../utils/path.js';
 
 const MODULE_MARKER = /<!-- MODULE:([a-z0-9-]+) -->/;
 const BEGIN_MARKER = /<!-- BEGIN MODULE:([a-z0-9-]+) -->/;
@@ -55,23 +55,40 @@ export function filterAgentsMd(templateContent, selectedModules) {
 export function syncAgentsMd(workspaceDir, projectName, modules) {
   const srcPath = resolveTemplatesDir('spec-center', 'AGENTS.md');
   const templateContent = readFileSync(srcPath, 'utf-8');
-  const selectedModuleNames = modules.map(m => m.name);
-  const filtered = filterAgentsMd(templateContent, selectedModuleNames);
+
+  // Built-in modules use template markers; custom modules do not.
+  // For custom modules, include the reference template's marker so its
+  // content is preserved, then merge custom entries on top.
+  const builtInNames = modules
+    .filter(m => !m.isCustom)
+    .map(m => m.name);
+  const customRefs = modules
+    .filter(m => m.isCustom)
+    .map(m => m.templateRef);
+  const filterNames = [...new Set([...builtInNames, ...customRefs])];
+
+  const filtered = filterAgentsMd(templateContent, filterNames);
   const replaced = filtered.replace(/\{\{PROJECT\}\}/g, projectName);
-  const destPath = join(workspaceDir, `${projectName}-spec-center`, 'AGENTS.md');
+  const destPath = join(workspaceDir, `${projectName}${SPEC_CENTER_SUFFIX}`, 'AGENTS.md');
   writeFileSync(destPath, replaced, 'utf-8');
+
+  // Now merge custom module entries into the generated file
+  const customModules = modules.filter(m => m.isCustom);
+  if (customModules.length > 0) {
+    mergeAgentsMd(workspaceDir, projectName, customModules);
+  }
 }
 
 export function mergeAgentsMd(workspaceDir, projectName, newModules) {
-  const agentsPath = join(workspaceDir, `${projectName}-spec-center`, 'AGENTS.md');
+  const agentsPath = join(workspaceDir, `${projectName}${SPEC_CENTER_SUFFIX}`, 'AGENTS.md');
   let content = readFileSync(agentsPath, 'utf-8');
 
   for (const mod of newModules) {
-    const role = getModuleRole(mod.templateRef);
+    const role = buildModuleRole(mod);
     const tableRow = `| \`${mod.name}\` | ${role} |`;
     content = insertIntoModuleMap(content, tableRow, mod.name);
 
-    const treeEntry = buildModuleTreeEntry(projectName, mod.name);
+    const treeEntry = buildModuleTreeEntry(projectName, mod.name, role);
     content = insertIntoRepoTree(content, treeEntry);
   }
 
@@ -85,10 +102,10 @@ function insertIntoModuleMap(content, newRow, moduleName) {
   let tableEnd = -1;
 
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].includes('| Module |') && lines[i].includes('Role')) {
+    if (lines[i].includes('| Module |')) {
       tableStart = i;
     }
-    if (tableStart !== -1 && separatorIdx === -1 && lines[i].match(/^\|---/)) {
+    if (tableStart !== -1 && separatorIdx === -1 && /^\|[-:|]+\|/.test(lines[i])) {
       separatorIdx = i;
     }
     if (separatorIdx !== -1 && tableEnd === -1) {
@@ -103,7 +120,11 @@ function insertIntoModuleMap(content, newRow, moduleName) {
   }
   if (tableStart === -1 || separatorIdx === -1) return content;
 
+  // Check for duplicate module name
   const dataRows = lines.slice(separatorIdx + 1, tableEnd + 1);
+  const alreadyExists = dataRows.some(row => row.includes(`\`${moduleName}\``));
+  if (alreadyExists) return content;
+
   dataRows.push(newRow);
 
   dataRows.sort((a, b) => {
@@ -117,15 +138,36 @@ function insertIntoModuleMap(content, newRow, moduleName) {
 }
 
 function insertIntoRepoTree(content, treeEntry) {
-  const lastCodeBlock = content.lastIndexOf('```');
-  if (lastCodeBlock === -1) return content;
+  const lines = content.split('\n');
+  let lastTreeLineIdx = -1;
 
-  const before = content.substring(0, lastCodeBlock);
-  const after = content.substring(lastCodeBlock);
-  return before + treeEntry + '\n' + after;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].match(/^.{0,3}(├──|└──)/)) {
+      lastTreeLineIdx = i;
+    }
+  }
+
+  if (lastTreeLineIdx === -1) {
+    // Fallback: append before last code block close
+    const lastCodeBlock = content.lastIndexOf('```');
+    if (lastCodeBlock === -1) return content;
+    const before = content.substring(0, lastCodeBlock);
+    const after = content.substring(lastCodeBlock);
+    return before + treeEntry + '\n' + after;
+  }
+
+  // Insert after the last tree entry line
+  lines.splice(lastTreeLineIdx + 1, 0, treeEntry);
+  return lines.join('\n');
 }
 
-function buildModuleTreeEntry(projectName, moduleName) {
+function buildModuleRole(mod) {
+  if (!mod.isCustom) return getModuleRole(mod.templateRef);
+  const capitalizedName = mod.name.charAt(0).toUpperCase() + mod.name.slice(1);
+  return `${capitalizedName} application`;
+}
+
+function buildModuleTreeEntry(projectName, moduleName, role) {
   const dirName = `${projectName}-${moduleName}`;
-  return `├── ${dirName}/\n│   ├── AGENTS.md\n│   └── docs/\n│       ├── specs/\n│       └── plans/`;
+  return `├── ${dirName}/           # ${role}\n│   ├── AGENTS.md\n│   └── docs/\n│       ├── specs/\n│       └── plans/`;
 }
