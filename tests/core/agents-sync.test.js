@@ -12,21 +12,21 @@ const TEMPLATE = `# Spec Center (SSOT)
 
 ### Module Map
 
-| Module | Role |
-|---|---|
-<!-- MODULE:admin -->| \`admin\` | Admin application|
-<!-- MODULE:mobile -->| \`mobile\` | Mobile application |
-<!-- MODULE:server -->| \`server\` | Backend service implementation |
-| \`spec-center\` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
-<!-- MODULE:web -->| \`web\` | Web application|
+|| Module | Role |
+||---|---|
+|<!-- MODULE:admin -->| \`admin\` | Admin application|
+|<!-- MODULE:mobile -->| \`mobile\` | Mobile application |
+|<!-- MODULE:server -->| \`server\` | Backend service implementation |
+|| \`spec-center\` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
+|<!-- MODULE:web -->| \`web\` | Web application|
 
 ## Some Content
 
-| Document | Where | Example |
-|---|---|---|
-| Cross-module domain spec (what) | \`spec-center/docs/specs/\` | \`2026-05-30-feature-design.md\` |
-<!-- MODULE:server -->| Server implementation plan (how) | \`server/docs/plans/\` | \`2026-05-30-feature.md\` |
-<!-- MODULE:web -->| Web implementation plan (how) | \`web/docs/plans/\` | \`2026-05-30-feature.md\` |
+|| Document | Where | Example |
+||---|---|---|
+|| Cross-module domain spec (what) | \`spec-center/docs/specs/\` | \`2026-05-30-feature-design.md\` |
+|<!-- MODULE:server -->| Server implementation plan (how) | \`server/docs/plans/\` | \`2026-05-30-feature.md\` |
+|<!-- MODULE:web -->| Web implementation plan (how) | \`web/docs/plans/\` | \`2026-05-30-feature.md\` |
 
 ## Repository Structure
 
@@ -151,9 +151,9 @@ describe('syncAgentsMd', () => {
     const agentsPath = join(specCenterDir, 'AGENTS.md');
     const content = readFileSync(agentsPath, 'utf-8');
 
-    // Module Map should contain both server and crawler
-    expect(content).toContain('`server`');
-    expect(content).toContain('`crawler`');
+    // Module Map should contain both server and crawler with project prefix
+    expect(content).toContain('`acme-server`');
+    expect(content).toContain('`acme-crawler`');
 
     // Repository Structure should contain both directories
     expect(content).toContain('acme-server/');
@@ -185,7 +185,7 @@ describe('syncAgentsMd', () => {
     const agentsPath = join(specCenterDir, 'AGENTS.md');
     const content = readFileSync(agentsPath, 'utf-8');
 
-    expect(content).toContain('`web`');
+    expect(content).toContain('`myapp-web`');
     expect(content).toContain('myapp-web/');
     expect(content).not.toContain('{{PROJECT}}');
   });
@@ -208,15 +208,15 @@ describe('mergeAgentsMd', () => {
     const specCenterDir = join(workspaceDir, `${projectName}-spec-center`);
     mkdirSync(specCenterDir, { recursive: true });
 
-    // Create a minimal existing AGENTS.md
+    // Create a minimal existing AGENTS.md (mimicking syncAgentsMd output with project-prefixed names)
     const agentsPath = join(specCenterDir, 'AGENTS.md');
     writeFileSync(agentsPath, `# Spec Center
 
 ### Module Map
 
-| Module | Role |
-|---|---|
-| \`spec-center\` | SSOT |
+|| Module | Role |
+||---|---|
+|| \`acme-spec-center\` | SSOT |
 
 ## Repository Structure
 
@@ -232,8 +232,8 @@ workspace/
 
     const content = readFileSync(agentsPath, 'utf-8');
 
-    // Module Map should have web
-    expect(content).toContain('| `web` |');
+    // Module Map should have web with project prefix
+    expect(content).toContain('| `acme-web` |');
     expect(content).toContain('Web application');
 
     // Repository Structure should have role comment
@@ -252,9 +252,9 @@ workspace/
 
 ### Module Map
 
-| Module | Role |
-|---|---|
-| \`spec-center\` | SSOT |
+|| Module | Role |
+||---|---|
+|| \`acme-spec-center\` | SSOT |
 
 ## Repository Structure
 
@@ -270,7 +270,7 @@ workspace/
 
     const content = readFileSync(agentsPath, 'utf-8');
 
-    expect(content).toContain('`crawler`');
+    expect(content).toContain('`acme-crawler`');
     expect(content).toContain('Crawler application');
 
     // Tree entry should have role comment

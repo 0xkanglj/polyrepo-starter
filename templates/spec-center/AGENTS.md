@@ -8,11 +8,11 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 
 | Module | Role |
 |---|---|
-<!-- MODULE:admin -->| `admin` | Admin application|
-<!-- MODULE:mobile -->| `mobile` | Mobile application |
-<!-- MODULE:server -->| `server` | Server application |
-| `spec-center` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
-<!-- MODULE:web -->| `web` | Web application|
+<!-- MODULE:admin -->| `{{PROJECT}}-admin` | Admin application|
+<!-- MODULE:mobile -->| `{{PROJECT}}-mobile` | Mobile application |
+<!-- MODULE:server -->| `{{PROJECT}}-server` | Server application |
+| `{{PROJECT}}-spec-center` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
+<!-- MODULE:web -->| `{{PROJECT}}-web` | Web application|
 
 > **Adding a New Module**: When a new module directory is created, the following steps MUST be performed:
 > 1. Add the new module entry to the **Module Map** table above (sorted alphabetically).

@@ -57,10 +57,10 @@ describe('init command integration', () => {
     expect(existsSync(resolve(workspace, 'myapp-admin'))).toBe(false);
 
     const agentsContent = readFileSync(resolve(workspace, 'myapp-spec-center', 'AGENTS.md'), 'utf-8');
-    expect(agentsContent).toContain('`server`');
-    expect(agentsContent).toContain('`web`');
-    expect(agentsContent).not.toContain('`mobile`');
-    expect(agentsContent).not.toContain('`admin`');
+    expect(agentsContent).toContain('| `myapp-server`');
+    expect(agentsContent).toContain('| `myapp-web`');
+    expect(agentsContent).not.toContain('| `myapp-mobile`');
+    expect(agentsContent).not.toContain('| `myapp-admin`');
   });
 
   it('shows dry-run without creating files', () => {

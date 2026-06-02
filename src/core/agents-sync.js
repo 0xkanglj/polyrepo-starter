@@ -85,8 +85,9 @@ export function mergeAgentsMd(workspaceDir, projectName, newModules) {
 
   for (const mod of newModules) {
     const role = buildModuleRole(mod);
-    const tableRow = `| \`${mod.name}\` | ${role} |`;
-    content = insertIntoModuleMap(content, tableRow, mod.name);
+    const fullModuleName = `${projectName}-${mod.name}`;
+    const tableRow = `| \`${fullModuleName}\` | ${role} |`;
+    content = insertIntoModuleMap(content, tableRow, fullModuleName);
 
     const treeEntry = buildModuleTreeEntry(projectName, mod.name, role);
     content = insertIntoRepoTree(content, treeEntry);

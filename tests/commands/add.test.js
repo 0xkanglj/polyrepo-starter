@@ -38,7 +38,7 @@ describe('add command integration', () => {
     expect(existsSync(resolve(workspaceDir, 'acme-web', '.git'))).toBe(true);
 
     const agentsContent = readFileSync(resolve(workspaceDir, 'acme-spec-center', 'AGENTS.md'), 'utf-8');
-    expect(agentsContent).toContain('`web`');
+    expect(agentsContent).toContain('`acme-web`');
   });
 
   it('skips already existing module with warning', () => {
