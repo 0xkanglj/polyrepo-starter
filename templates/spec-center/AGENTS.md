@@ -10,7 +10,7 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 |---|---|
 <!-- MODULE:admin -->| `admin` | Admin manager application|
 <!-- MODULE:mobile -->| `mobile` | Mobile application |
-<!-- MODULE:server -->| `server` | Backend service implementation |
+<!-- MODULE:server -->| `server` | Server application |
 | `spec-center` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
 <!-- MODULE:web -->| `web` | Web application|
 
@@ -139,7 +139,7 @@ All convention documents live in `conventions/` and define cross-cutting rules t
 | Document | Scope | Description |
 |---|---|---|
 | [http-constitution.md](conventions/http-constitution.md) | All HTTP services / APIs | HTTP 全局设计规范：方法选择、状态码、响应结构、分页、排序、时间格式、版本管理等 |
-| [validation.md](conventions/validation.md) | All Go microservices | 输入校验规范：校验库选型、字段规则、错误格式、自定义校验器 |
+| [go-validation.md](conventions/go-validation.md) | All Go microservices | Go 项目输入校验规范：校验库选型、字段规则、错误格式、自定义校验器 |
 | [go-project.md](conventions/go-project.md) | All Go backend services | Go 项目结构约定：目录布局、分层模式、命名规范 |
 | [engineering-guidelines.md](conventions/engineering-guidelines.md) | All modules & dev tools | LLM/agent 编码行为规范：编码前思考、代码风格、重构原则、安全约束 |
 | [conventional-commits.md](conventions/conventional-commits.md) | All modules | Git 提交信息规范：类型、范围、格式 |
@@ -175,7 +175,7 @@ workspace/
 │   │   ├── conventional-commits.md  # Git 提交信息规范
 │   │   ├── engineering-guidelines.md  # LLM/agent coding behavior guidelines
 │   │   ├── http-constitution.md  # HTTP/API 全局设计规范 (v1.0)
-│   │   ├── validation.md         # Input validation 校验规范 (v1.0)
+│   │   ├── go-validation.md      # Go project Input validation 校验规范 (v1.0)
 │   │   └── go-project.md         # Go project structure (v1.0)
 │   ├── api/                      # API specifications (OpenAPI / endpoint specs)
 │   │   └── .gitkeep
@@ -186,7 +186,7 @@ workspace/
 │   │   └── error-codes.md        # Business error code registry
 │   └── events/                   # Inter-module event definitions
 │       └── .gitkeep
-<!-- BEGIN MODULE:server -->├── {{PROJECT}}-server/           # Backend service
+<!-- BEGIN MODULE:server -->├── {{PROJECT}}-server/           # Server application
 │   ├── AGENTS.md                 # Server-specific conventions
 │   └── docs/
 │       ├── specs/                # Server-specific specifications
