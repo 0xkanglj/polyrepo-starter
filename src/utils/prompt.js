@@ -33,37 +33,21 @@ export async function promptDir(defaultDir) {
 
 /**
  * 交互式选择模块（用于 init 命令）
- * @returns {Promise<Array<{name: string, templateRef: string, isCustom: boolean}>>}
+ * 展示 templates/ 下除 spec-center 外的所有模块，不含 custom 选项
+ * @returns {Promise<Array<{name: string, templateRef: string, isCustom: false}>>}
  */
 export async function promptModules() {
-  const available = getAvailableTemplateNames();
-  const choices = [
-    ...available.map(name => ({
-      name: name === SPEC_CENTER_NAME ? `${name} (required)` : name,
-      value: name,
-      disabled: name === SPEC_CENTER_NAME,
-    })),
-    { name: '+ Custom module...', value: '__custom__' },
-  ];
+  const available = getAvailableTemplateNames().filter(
+    (name) => name !== SPEC_CENTER_NAME
+  );
 
   const selected = await checkbox({
     message: 'Select modules:',
-    choices,
-    required: true,
-    initialValues: [SPEC_CENTER_NAME],
+    choices: available.map((name) => ({ name, value: name })),
+    required: false,
   });
 
-  const modules = [];
-  for (const sel of selected) {
-    if (sel === '__custom__') {
-      const customModules = await promptCustomModule();
-      modules.push(...customModules);
-    } else {
-      modules.push({ name: sel, templateRef: sel, isCustom: false });
-    }
-  }
-
-  return modules;
+  return selected.map((name) => ({ name, templateRef: name, isCustom: false }));
 }
 
 /**
