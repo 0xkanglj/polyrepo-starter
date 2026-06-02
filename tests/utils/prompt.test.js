@@ -1,0 +1,108 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { parseModuleList, promptModuleName } from '../../src/utils/prompt.js';
+import { input } from '@inquirer/prompts';
+
+vi.mock('@inquirer/prompts', () => ({
+  input: vi.fn(),
+  checkbox: vi.fn(),
+  confirm: vi.fn(),
+  select: vi.fn(),
+}));
+
+describe('parseModuleList', () => {
+  it('parses comma-separated module names', () => {
+    const result = parseModuleList('server,web,mobile');
+    expect(result).toEqual([
+      { name: 'server', templateRef: 'server', isCustom: false },
+      { name: 'web', templateRef: 'web', isCustom: false },
+      { name: 'mobile', templateRef: 'mobile', isCustom: false },
+    ]);
+  });
+
+  it('filters empty items from the list', () => {
+    const result = parseModuleList('server,,web,');
+    expect(result).toEqual([
+      { name: 'server', templateRef: 'server', isCustom: false },
+      { name: 'web', templateRef: 'web', isCustom: false },
+    ]);
+  });
+
+  it('trims whitespace around names', () => {
+    const result = parseModuleList(' server , web ');
+    expect(result).toEqual([
+      { name: 'server', templateRef: 'server', isCustom: false },
+      { name: 'web', templateRef: 'web', isCustom: false },
+    ]);
+  });
+
+  it('returns empty array for empty string', () => {
+    const result = parseModuleList('');
+    expect(result).toEqual([]);
+  });
+});
+
+describe('promptModuleName', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns isCustom=false when name equals templateName', async () => {
+    input.mockResolvedValueOnce('server');
+    const result = await promptModuleName('server', [], []);
+    expect(result).toEqual({
+      name: 'server',
+      templateRef: 'server',
+      isCustom: false,
+    });
+  });
+
+  it('returns isCustom=true when name differs from templateName', async () => {
+    input.mockResolvedValueOnce('crawler');
+    const result = await promptModuleName('server', [], []);
+    expect(result).toEqual({
+      name: 'crawler',
+      templateRef: 'server',
+      isCustom: true,
+    });
+  });
+
+  it('rejects empty name', async () => {
+    input.mockResolvedValueOnce('');
+    const result = await promptModuleName('server', [], []);
+    const validateFn = input.mock.calls[0][0].validate;
+    expect(validateFn('')).toBe('模块名不能为空');
+  });
+
+  it('rejects name that conflicts with existing module', async () => {
+    input.mockResolvedValueOnce('server');
+    await promptModuleName('server', ['server'], []);
+    const validateFn = input.mock.calls[0][0].validate;
+    expect(validateFn('server')).toBe('模块名 "server" 已被使用');
+  });
+
+  it('rejects name that conflicts with session-added module', async () => {
+    input.mockResolvedValueOnce('crawler');
+    await promptModuleName('server', [], ['crawler']);
+    const validateFn = input.mock.calls[0][0].validate;
+    expect(validateFn('crawler')).toBe('模块名 "crawler" 已被使用');
+  });
+
+  it('rejects invalid name format', async () => {
+    input.mockResolvedValueOnce('INVALID');
+    await promptModuleName('server', [], []);
+    const validateFn = input.mock.calls[0][0].validate;
+    expect(typeof validateFn('INVALID')).toBe('string');
+  });
+
+  it('provides no default when template name is taken', async () => {
+    input.mockResolvedValueOnce('myserver');
+    await promptModuleName('server', ['server'], []);
+    expect(input.mock.calls[0][0].default).toBeUndefined();
+  });
+
+  it('provides template name as default when not taken', async () => {
+    input.mockResolvedValueOnce('server');
+    await promptModuleName('server', [], []);
+    expect(input.mock.calls[0][0].default).toBe('server');
+  });
+});

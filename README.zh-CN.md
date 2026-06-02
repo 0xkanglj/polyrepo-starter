@@ -39,10 +39,11 @@ node src/cli.js init [选项]
 ```bash
 node src/cli.js add [选项]
   -m, --modules <列表>       逗号分隔的模块列表
-  -c, --custom <名称:模板>   添加自定义模块（如 crawler:server）
       --templates-dir <路径> 覆盖模板目录
       --dry-run              预览将创建的内容
 ```
+
+交互模式下，依次选择模板、输入模块名（可重命名）。同一模板可多次使用、不同命名。
 
 ## 模块说明
 
@@ -53,16 +54,6 @@ node src/cli.js add [选项]
 | web | 可选 | Web 应用 |
 | mobile | 可选 | 移动端应用 |
 | admin | 可选 | 管理后台应用 |
-
-### 自定义模块
-
-可基于已有模板创建自定义模块：
-
-```bash
-node src/cli.js add -c crawler:server
-```
-
-将基于 `server` 模板创建 `{name}-crawler` 目录。
 
 ## 生成目录结构
 
