@@ -2,42 +2,11 @@
 .worktrees/
 .superpowers/
 
-# Dependencies (defensive — also in Cursor defaults)
+# Dependencies — too large / supply-chain noise for Agent
 node_modules/
 vendor/
-
-# Lock files (defensive — also in Cursor defaults)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-go.sum
 
 # Environment — must block agent access to secrets
 .env
 .env.*
 !.env.example
-
-# Build output
-dist/
-build/
-output/
-bin/
-coverage/
-
-# Generated code
-*.generated.*
-generated/
-
-# Logs
-*.log
-
-# Documentation media (preventive — template may grow media assets)
-docs/assets/
-*.mp4
-*.mov
-
-# IDE/OS
-.idea/
-.vscode/
-.DS_Store
-Thumbs.db
