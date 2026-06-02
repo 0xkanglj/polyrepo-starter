@@ -1,0 +1,25 @@
+# Lock files (git-tracked; Agent may need for dependency debugging)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+dist/
+build/
+output/
+bin/
+coverage/
+
+# Generated code (git-tracked; Agent may need for API alignment)
+*.generated.*
+generated/
+
+# Logs
+*.log
+
+
+# IDE/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
