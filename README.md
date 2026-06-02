@@ -39,10 +39,11 @@ node src/cli.js init [options]
 ```bash
 node src/cli.js add [options]
   -m, --modules <list>       Comma-separated modules to add
-  -c, --custom <name:ref>    Add custom module (e.g. crawler:server)
       --templates-dir <path> Override templates directory
       --dry-run              Show what would be created
 ```
+
+Interactive mode prompts you to select a template, then optionally rename the module. You can reuse the same template with different names.
 
 ## Module Selection
 
@@ -53,16 +54,6 @@ node src/cli.js add [options]
 | web | Optional | Web application |
 | mobile | Optional | Mobile application |
 | admin | Optional | Admin manager application |
-
-### Custom Modules
-
-You can create custom modules based on existing templates:
-
-```bash
-node src/cli.js add -c crawler:server
-```
-
-This creates a `{name}-crawler` directory based on the `server` template.
 
 ## What Gets Generated
 
