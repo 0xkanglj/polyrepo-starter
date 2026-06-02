@@ -192,8 +192,12 @@ function insertIntoRepoTree(content, treeEntry) {
 
 function buildModuleRole(mod) {
   if (!mod.isCustom) return getModuleRole(mod.templateRef);
-  const capitalizedName = mod.name.charAt(0).toUpperCase() + mod.name.slice(1);
-  return `${capitalizedName} application`;
+  try {
+    return getModuleRole(mod.templateRef);
+  } catch {
+    const capitalizedName = mod.name.charAt(0).toUpperCase() + mod.name.slice(1);
+    return `${capitalizedName} application`;
+  }
 }
 
 function buildModuleTreeEntry(projectName, moduleName, role) {

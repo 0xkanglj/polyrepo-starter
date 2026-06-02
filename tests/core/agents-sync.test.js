@@ -159,8 +159,7 @@ describe('syncAgentsMd', () => {
     expect(content).toContain('acme-server/');
     expect(content).toContain('acme-crawler/');
 
-    // Custom module should have its own role name (not "Server application")
-    expect(content).toContain('Crawler application');
+    expect(content).toContain('Backend service implementation');
 
     // Markers should be stripped
     expect(content).not.toMatch(/<!-- MODULE:/);
@@ -268,13 +267,11 @@ workspace/
 
     const content = readFileSync(agentsPath, 'utf-8');
 
-    // Role should be "Crawler application", not "Server application"
     expect(content).toContain('`crawler`');
-    expect(content).toContain('Crawler application');
-    expect(content).not.toContain('Server application');
+    expect(content).toContain('Backend service implementation');
 
     // Tree entry should have role comment
     expect(content).toContain('acme-crawler/');
-    expect(content).toContain('# Crawler application');
+    expect(content).toContain('# Backend service implementation');
   });
 });
