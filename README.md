@@ -4,93 +4,85 @@ Universal scaffold for multi-repo workspace projects. Generates independent Git 
 
 ## Quick Start
 
-```bash
-./init.sh
-```
-
-Follow the interactive prompts to name your project and select modules.
-
-## Non-interactive Usage
+### Remote (recommended)
 
 ```bash
-# Create workspace with specific modules
-./init.sh -n acme -d ~/projects/acme -m spec-center,server,web
-
-# Preview without writing files
-./init.sh --dry-run -n myapp
+curl -fsSL https://raw.githubusercontent.com/{owner}/spec-center-template/main/kickstart.sh | bash
 ```
 
-## What Gets Generated
+### Local
 
-`init.sh` creates a workspace directory containing independent Git repos:
-
-```
-my-project-workspace/
-├── AGENTS.md                  → Points to spec-center AGENTS.md
-├── CLAUDE.md                  → Points to AGENTS.md
-├── .claude/settings.json      → Claude Code hard-tier deny rules
-├── .opencode/opencode.json    → OpenCode hard-tier deny rules
-├── my-project-spec-center/    → SSOT repo (specs, conventions, error codes)
-├── my-project-server/         → Backend service repo
-├── my-project-web/            → Web application repo
-├── my-project-mobile/         → Mobile application repo
-└── my-project-admin/          → Admin panel repo
+```bash
+git clone https://github.com/{owner}/spec-center-template.git
+cd spec-center-template
+npm install
+node src/cli.js init
 ```
 
-Each **code module** repo (server, web, mobile, admin) and the **workspace root** are initialized with:
-- `AGENTS.md` — Module role, mandatory specs, tech stack placeholders
-- `CLAUDE.md` — Points to AGENTS.md
-- `.claude/settings.json` — Hard-tier deny rules for Claude Code (secrets, dependencies)
-- `.opencode/opencode.json` — Hard-tier deny rules for OpenCode (same scope as `.cursorignore`)
-- `.cursorignore` / `.cursorindexingignore` — Cursor hard/soft ignore tiers
-- `.gitignore` — Universal IDE/OS/env/build entries
-- `Makefile` — Build task skeleton (help/install/dev/build/test/lint/clean)
-- `.env.example` — Environment variable skeleton
-- `docs/specs/` and `docs/plans/` — Documentation directories
+## Commands
 
-The **spec-center** repo is docs-only: it gets `AGENTS.md`, `CLAUDE.md`, and `.gitignore` only — no agent deny configs (`.claude/`, `.opencode/`), Cursor ignore files, `Makefile`, or `.env.example`.
+### `init` — Create a new workspace
 
-The spec-center repo also includes:
-- HTTP API convention (`conventions/http-constitution.md`)
-- Input validation convention (`conventions/validation.md`)
-- Go project structure convention (`conventions/go-project.md`)
-- Engineering guidelines for LLM/agent coding (`conventions/engineering-guidelines.md`)
-- Error code registry (`errors/error-codes.md`)
+```bash
+node src/cli.js init [options]
+  -n, --name <name>          Project name
+  -d, --dir <path>           Workspace directory (default: ./{name})
+  -m, --modules <list>       Comma-separated modules
+      --templates-dir <path> Override templates directory
+      --dry-run              Show what would be created
+```
 
-## Design Principles
+### `add` — Add modules to existing workspace
 
-- **Multi-repo, not monorepo** — Each module is an independent Git repository
-- **SSOT via spec-center** — All cross-module contracts live in one place
-- **No tech stack presets** — Makefile and .env.example provide skeletons only
-- **SDD + TDD** — Specification-Driven and Test-Driven Development
+```bash
+node src/cli.js add [options]
+  -m, --modules <list>       Comma-separated modules to add
+  -c, --custom <name:ref>    Add custom module (e.g. crawler:server)
+      --templates-dir <path> Override templates directory
+      --dry-run              Show what would be created
+```
 
 ## Module Selection
 
-| Module | Always Included | Description |
-|--------|----------------|-------------|
+| Module | Required | Description |
+|--------|----------|-------------|
 | spec-center | ✅ | Shared specs and conventions (SSOT) |
-| server | ✅ | Backend service |
+| server | Optional | Backend service |
 | web | Optional | Web application |
 | mobile | Optional | Mobile application |
 | admin | Optional | Admin manager application |
 
-## Options
+### Custom Modules
+
+You can create custom modules based on existing templates:
+
+```bash
+node src/cli.js add -c crawler:server
+```
+
+This creates a `{name}-crawler` directory based on the `server` template.
+
+## What Gets Generated
 
 ```
-./init.sh [OPTIONS]
-
-Options:
-  -n, --name      Project name (skip interactive prompt)
-  -d, --dir       Target directory (default: ./{name}-workspace)
-  -m, --modules   Comma-separated modules (skip interactive selection)
-  --dry-run       Show what would be created without writing anything
-  -h, --help      Show help
+my-project/                           # workspace root (NOT a git Repo)
+├── AGENTS.md                         → Points to spec-center AGENTS.md
+├── CLAUDE.md                         → Points to AGENTS.md
+├── .claude/settings.json             → Claude Code deny rules
+├── .opencode/opencode.json           → OpenCode deny rules
+├── .cursorignore / .cursorindexingignore
+├── .cursor/rules/engineering-guidelines.mdc
+├── my-project-spec-center/           → SSOT repo (specs, conventions, error codes)
+├── my-project-server/                → Backend service repo
+├── my-project-web/                   → Web application repo
+├── my-project-mobile/                → Mobile application repo
+└── my-project-admin/                 → Admin panel repo
 ```
 
 ## Project Name Rules
 
 - Start with lowercase letter
 - Only lowercase letters, digits, and hyphens
-- No trailing hyphen
+- No consecutive or trailing hyphens
 - 2-50 characters
 - Pattern: `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`
