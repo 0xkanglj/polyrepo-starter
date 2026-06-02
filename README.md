@@ -2,6 +2,8 @@
 
 Universal scaffold for multi-repo workspace projects. Generates independent Git repositories (spec-center, server, web, mobile, admin) that share conventions through a single source of truth.
 
+**[简体中文](README.zh-CN.md)**
+
 ## Quick Start
 
 ### Remote (recommended)
