@@ -2,6 +2,7 @@ import { input, checkbox, confirm, select } from '@inquirer/prompts';
 import { validateProjectName, SPEC_CENTER_NAME } from './path.js';
 import { getAvailableTemplateNames, validateTemplate } from '../core/templates.js';
 import { warn } from './logger.js';
+import { CommandError } from './errors.js';
 
 /**
  * 交互式输入项目名
@@ -51,68 +52,6 @@ export async function promptModules() {
 }
 
 /**
- * 交互式选择要添加的模块（用于 add 命令）
- * @param {string[]} available - 可添加的模块名列表
- * @returns {Promise<Array<{name: string, templateRef: string, isCustom: boolean}>>}
- */
-export async function promptAddModules(available) {
-  const choices = [
-    ...available.map(name => ({ name, value: name })),
-    { name: '+ Custom module...', value: '__custom__' },
-  ];
-
-  const selected = await checkbox({
-    message: 'Select modules to add:',
-    choices,
-  });
-
-  const modules = [];
-  for (const sel of selected) {
-    if (sel === '__custom__') {
-      const customModules = await promptCustomModule();
-      modules.push(...customModules);
-    } else {
-      modules.push({ name: sel, templateRef: sel, isCustom: false });
-    }
-  }
-
-  return modules;
-}
-
-/**
- * 交互式输入自定义模块信息
- * @returns {Promise<Array<{name: string, templateRef: string, isCustom: boolean}>>}
- */
-export async function promptCustomModule() {
-  const customs = [];
-  let addAnother = true;
-
-  while (addAnother) {
-    const name = await input({
-      message: 'Custom module name:',
-      validate: (value) => {
-        const result = validateProjectName(value.trim());
-        if (result !== true) return result;
-        return true;
-      },
-    });
-
-    const templates = getAvailableTemplateNames().filter(t => t !== SPEC_CENTER_NAME);
-    const templateRef = await select({
-      message: 'Reference template:',
-      choices: templates.map(t => ({ name: t, value: t })),
-    });
-
-    customs.push({ name: name.trim(), templateRef, isCustom: true });
-
-    const more = await confirm({ message: 'Add another custom module?', default: false });
-    addAnother = more;
-  }
-
-  return customs;
-}
-
-/**
  * 解析逗号分隔的模块列表字符串
  * @param {string} moduleStr - 逗号分隔的模块名
  * @returns {Array<{name: string, templateRef: string, isCustom: boolean}>}
@@ -128,4 +67,85 @@ export function parseModuleList(moduleStr) {
       return true;
     })
     .map(name => ({ name, templateRef: name, isCustom: false }));
+}
+
+/**
+ * 交互式单选一个模块（用于 add 命令）
+ * 展示所有模板（排除 spec-center），不区分已存在与否
+ * @param {string[]} existingModules - 已有模块名列表（预留，暂不使用）
+ * @returns {Promise<{templateName: string}>}
+ */
+export async function promptAddOneModule(existingModules) {
+  const templates = getAvailableTemplateNames().filter(
+    (t) => t !== SPEC_CENTER_NAME
+  );
+
+  if (templates.length === 0) {
+    throw new CommandError('No modules available to add.');
+  }
+
+  const templateName = await select({
+    message: '选择要添加的模块:',
+    choices: templates.map((t) => ({ name: t, value: t })),
+  });
+
+  return { templateName };
+}
+
+/**
+ * 交互式确认/输入模块名，含合法性+唯一性校验循环
+ * @param {string} templateName - 选中的模板名
+ * @param {string[]} existingModules - workspace 中已有模块名
+ * @param {string[]} sessionAdded - 本次会话已添加的模块名
+ * @returns {Promise<{name: string, templateRef: string, isCustom: boolean}>}
+ */
+export async function promptModuleName(templateName, existingModules, sessionAdded) {
+  const allTaken = [...existingModules, ...sessionAdded];
+  const templateNameTaken = existingModules.includes(templateName);
+
+  // Determine default value and warning hint
+  const hasDefault = !templateNameTaken;
+  let hintMessage = '';
+  if (templateNameTaken) {
+    hintMessage = `⚠ 模块 "${templateName}" 已存在，请输入不同的名称`;
+  }
+
+  // Validation function
+  function validateModuleName(value) {
+    const name = value.trim();
+
+    // Non-empty
+    if (!name) {
+      return '模块名不能为空';
+    }
+
+    // Regex check: same rules as project name
+    const regexResult = validateProjectName(name);
+    if (regexResult !== true) {
+      return regexResult;
+    }
+
+    // Uniqueness against workspace + session
+    if (allTaken.includes(name)) {
+      return `模块名 "${name}" 已被使用`;
+    }
+
+    return true;
+  }
+
+  // Prompt loop: if validation fails, re-prompt
+  const name = await input({
+    message: hintMessage
+      ? `${hintMessage}\n  模块名:`
+      : '模块名:',
+    default: hasDefault ? templateName : undefined,
+    validate: validateModuleName,
+  });
+
+  const trimmedName = name.trim();
+  return {
+    name: trimmedName,
+    templateRef: templateName,
+    isCustom: trimmedName !== templateName,
+  };
 }
