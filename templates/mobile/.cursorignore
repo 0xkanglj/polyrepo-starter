@@ -2,50 +2,11 @@
 .worktrees/
 .superpowers/
 
-# Dependencies (defensive — also in Cursor defaults; listed for explicitness)
+# Dependencies — too large / supply-chain noise for Agent
 node_modules/
 vendor/
 
-# Lock files (defensive — also in Cursor defaults; git-tracked but no AI value)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-go.sum
-
-# Environment — must block agent access to secrets (gitignored but agent can still read)
+# Environment — must block agent access to secrets
 .env
 .env.*
 !.env.example
-
-# Build output (gitignored but agent can still read)
-dist/
-build/
-output/
-bin/
-coverage/
-
-# Generated code (git-tracked but should not influence AI suggestions)
-*.generated.*
-generated/
-
-# Logs (gitignored but agent can still read)
-*.log
-
-# Documentation media (preventive — not yet present but likely as project grows)
-docs/assets/
-*.mp4
-*.mov
-
-# IDE/OS (gitignored but agent can still read)
-.idea/
-.vscode/
-.DS_Store
-Thumbs.db
-
-# Mobile-specific — active
-.dart_tool/
-
-# Mobile-specific (uncomment as needed)
-# ios/Pods/
-# android/.gradle/
-# android/app/build/
