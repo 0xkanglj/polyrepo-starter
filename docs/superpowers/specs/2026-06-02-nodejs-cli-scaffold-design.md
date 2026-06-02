@@ -486,11 +486,11 @@ export function copyAndReplace(templateName, targetDir, vars) {
     // 替换 {{PROJECT}}
     content = content.replace(/\{\{PROJECT\}\}/g, vars.PROJECT);
 
-    // 自定义模块：替换模块名引用
+    // 自定义模块：替换模块名引用（精确匹配 {{PROJECT}}-templateRef 形式）
     if (vars.MODULE_NAME && vars.TEMPLATE_REF) {
       content = content.replace(
-        new RegExp(`\\b${vars.TEMPLATE_REF}\\b`, 'g'),
-        vars.MODULE_NAME
+        new RegExp(`-${vars.TEMPLATE_REF}\\b`, 'g'),
+        `-${vars.MODULE_NAME}`
       );
     }
 
