@@ -139,15 +139,25 @@ function insertIntoModuleMap(content, newRow, moduleName) {
 
 function insertIntoRepoTree(content, treeEntry) {
   const lines = content.split('\n');
-  let lastTreeLineIdx = -1;
 
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].match(/^.{0,3}(├──|└──)/)) {
-      lastTreeLineIdx = i;
+  // Find the last code block close (```) — that's where the tree lives
+  let treeBlockClose = -1;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].trimStart() === '```') {
+      treeBlockClose = i;
+      break;
     }
   }
 
-  if (lastTreeLineIdx === -1) {
+  // Find the last top-level tree entry (├── or └── without leading │)
+  let lastEntryStart = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^[│ ]{0,3}(├──|└──)/.test(lines[i])) {
+      lastEntryStart = i;
+    }
+  }
+
+  if (lastEntryStart === -1 || treeBlockClose === -1) {
     // Fallback: append before last code block close
     const lastCodeBlock = content.lastIndexOf('```');
     if (lastCodeBlock === -1) return content;
@@ -156,8 +166,27 @@ function insertIntoRepoTree(content, treeEntry) {
     return before + treeEntry + '\n' + after;
   }
 
-  // Insert after the last tree entry line
-  lines.splice(lastTreeLineIdx + 1, 0, treeEntry);
+  // Find the end of the last entry's sub-tree
+  let lastEntryEnd = lastEntryStart;
+  for (let i = lastEntryStart + 1; i < treeBlockClose; i++) {
+    if (/^[│ ]{0,3}(├──|└──)/.test(lines[i])) break;
+    lastEntryEnd = i;
+  }
+
+  // Change the old last entry's └── to ├── if needed
+  if (lines[lastEntryStart].includes('└──')) {
+    lines[lastEntryStart] = lines[lastEntryStart].replace('└──', '├──');
+    // Fix sub-tree indentation: every 4-space indent group becomes │   
+    // "    ├──" → "│   ├──", "        └──" → "│   │   └──"
+    for (let i = lastEntryStart + 1; i <= lastEntryEnd; i++) {
+      lines[i] = lines[i].replace(/^( {4})+/g, (match) => {
+        return '│   '.repeat(match.length / 4);
+      });
+    }
+  }
+
+  // Insert the new entry after the last entry's sub-tree
+  lines.splice(lastEntryEnd + 1, 0, treeEntry);
   return lines.join('\n');
 }
 
@@ -169,5 +198,14 @@ function buildModuleRole(mod) {
 
 function buildModuleTreeEntry(projectName, moduleName, role) {
   const dirName = `${projectName}-${moduleName}`;
-  return `├── ${dirName}/           # ${role}\n│   ├── AGENTS.md\n│   └── docs/\n│       ├── specs/\n│       └── plans/`;
+  const cap = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+  return [
+    `└── ${dirName}/            # ${role}`,
+    `    ├── AGENTS.md                 # ${cap}-specific conventions`,
+    '    └── docs/',
+    `        ├── specs/                # ${cap}-specific specifications`,
+    '        │   └── .gitkeep',
+    `        └── plans/                # ${cap}-specific implementation plans`,
+    '            └── .gitkeep',
+  ].join('\n');
 }

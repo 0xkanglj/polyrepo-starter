@@ -90,10 +90,8 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 
 ```
 {{PROJECT}}-spec-center/docs/specs/2026-05-30-feature-design.md   ← SSOT spec
-<!-- BEGIN MODULE:server -->{{PROJECT}}-server/docs/plans/2026-05-30-feature.md               ← schema, API, tests
-<!-- END MODULE:server -->
-<!-- BEGIN MODULE:web -->{{PROJECT}}-web/docs/plans/2026-05-30-feature.md                  ← UI; Depends on server plan
-<!-- END MODULE:web -->
+{{PROJECT}}-server/docs/plans/2026-05-30-feature.md               ← schema, API, tests
+{{PROJECT}}-web/docs/plans/2026-05-30-feature.md                  ← UI; Depends on server plan
 ```
 
 ### Spec Ownership Quick Reference

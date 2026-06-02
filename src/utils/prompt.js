@@ -1,4 +1,4 @@
-import { input, checkbox, confirm } from '@inquirer/prompts';
+import { input, checkbox, confirm, select } from '@inquirer/prompts';
 import { validateProjectName, SPEC_CENTER_NAME } from './path.js';
 import { getAvailableTemplateNames, validateTemplate } from '../core/templates.js';
 import { warn } from './logger.js';
@@ -114,14 +114,12 @@ export async function promptCustomModule() {
     });
 
     const templates = getAvailableTemplateNames().filter(t => t !== SPEC_CENTER_NAME);
-    const templateRef = await checkbox({
+    const templateRef = await select({
       message: 'Reference template:',
       choices: templates.map(t => ({ name: t, value: t })),
-      required: true,
-      max: 1,
     });
 
-    customs.push({ name: name.trim(), templateRef: templateRef[0], isCustom: true });
+    customs.push({ name: name.trim(), templateRef, isCustom: true });
 
     const more = await confirm({ message: 'Add another custom module?', default: false });
     addAnother = more;
