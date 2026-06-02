@@ -31,10 +31,7 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 - Shared domain vocabulary and event schemas
 - Cross-module domain specs → `docs/specs/`
 - Data format conventions (date, pagination, sorting, etc.)
-- HTTP Constitution — 全局 HTTP/API 设计规范（[conventions/http-constitution.md](conventions/http-constitution.md)）
-- Input Validation — 请求参数校验规范（[conventions/validation.md](conventions/validation.md)）
-- Go Project Structure — Go 服务项目结构约定（[conventions/go-project.md](conventions/go-project.md)）
-- Engineering Guidelines — LLM/agent 编码行为规范（[conventions/engineering-guidelines.md](conventions/engineering-guidelines.md)）
+- Convention documents → `conventions/` — see [Convention Documents](#convention-documents)
 
 **Rule**: Any spec that affects two or more modules MUST live in `{{PROJECT}}-spec-center`. Any spec that only affects a single module MUST live in that module's own `docs/` directory.
 
@@ -106,8 +103,7 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 | Cross-module implementation plan | **Split** — one plan per module in `<module>/docs/plans/` (see [Implementation Plans](#implementation-plans-cross-module-features)) |
 | Error code and format | `{{PROJECT}}-spec-center/` |
 | Response envelope | `{{PROJECT}}-spec-center/` |
-| HTTP / API 设计规范（方法、状态码、响应结构、分页、时间等） | `{{PROJECT}}-spec-center/conventions/` |
-| Go Project Structure — Go 服务项目结构约定 | `{{PROJECT}}-spec-center/conventions/go-project.md` |
+| Convention documents (HTTP, validation, Go, engineering) | `{{PROJECT}}-spec-center/conventions/` — see [Convention Documents](#convention-documents) |
 | Retry / circuit-breaker policy | `{{PROJECT}}-spec-center/` |
 | Internal data model (not exposed via API) | Module's `docs/` |
 | Internal algorithm or business logic | Module's `docs/` |
@@ -134,25 +130,17 @@ All modules follow DDD principles:
 
 ## Conventions
 
-### Conventional Commits
+### Convention Documents
 
-Strictly follow [Conventional Commits](https://www.conventionalcommits.org/):
+All convention documents live in `conventions/` and define cross-cutting rules that every module MUST follow:
 
-```
-<type>(<scope>): <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-Types: `feat`, `fix`, `docs`, `spec`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
-
-Use `spec` type for spec-only changes:
-
-```
-spec(api): add endpoint specification
-```
+| Document | Scope | Description |
+|---|---|---|
+| [http-constitution.md](conventions/http-constitution.md) | All HTTP services / APIs | HTTP 全局设计规范：方法选择、状态码、响应结构、分页、排序、时间格式、版本管理等 |
+| [validation.md](conventions/validation.md) | All Go microservices | 输入校验规范：校验库选型、字段规则、错误格式、自定义校验器 |
+| [go-project.md](conventions/go-project.md) | All Go backend services | Go 项目结构约定：目录布局、分层模式、命名规范 |
+| [engineering-guidelines.md](conventions/engineering-guidelines.md) | All modules & dev tools | LLM/agent 编码行为规范：编码前思考、代码风格、重构原则、安全约束 |
+| [conventional-commits.md](conventions/conventional-commits.md) | All modules | Git 提交信息规范：类型、范围、格式 |
 
 ### AGENTS.md Hierarchy
 
@@ -182,6 +170,7 @@ workspace/
 ├── {{PROJECT}}-spec-center/      # SSOT - shared specs and contracts
 │   ├── AGENTS.md                 # This file - global project rules
 │   ├── conventions/              # Shared conventions
+│   │   ├── conventional-commits.md  # Git 提交信息规范
 │   │   ├── engineering-guidelines.md  # LLM/agent coding behavior guidelines
 │   │   ├── http-constitution.md  # HTTP/API 全局设计规范 (v1.0)
 │   │   ├── validation.md         # Input validation 校验规范 (v1.0)
