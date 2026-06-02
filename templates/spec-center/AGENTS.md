@@ -34,6 +34,7 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 - HTTP Constitution — 全局 HTTP/API 设计规范（[conventions/http-constitution.md](conventions/http-constitution.md)）
 - Input Validation — 请求参数校验规范（[conventions/validation.md](conventions/validation.md)）
 - Go Project Structure — Go 服务项目结构约定（[conventions/go-project.md](conventions/go-project.md)）
+- Engineering Guidelines — LLM/agent 编码行为规范（[conventions/engineering-guidelines.md](conventions/engineering-guidelines.md)）
 
 **Rule**: Any spec that affects two or more modules MUST live in `{{PROJECT}}-spec-center`. Any spec that only affects a single module MUST live in that module's own `docs/` directory.
 
@@ -181,6 +182,7 @@ workspace/
 ├── {{PROJECT}}-spec-center/      # SSOT - shared specs and contracts
 │   ├── AGENTS.md                 # This file - global project rules
 │   ├── conventions/              # Shared conventions
+│   │   ├── engineering-guidelines.md  # LLM/agent coding behavior guidelines
 │   │   ├── http-constitution.md  # HTTP/API 全局设计规范 (v1.0)
 │   │   ├── validation.md         # Input validation 校验规范 (v1.0)
 │   │   └── go-project.md         # Go project structure (v1.0)

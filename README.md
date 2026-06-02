@@ -47,6 +47,7 @@ The spec-center repo also includes:
 - HTTP API convention (`conventions/http-constitution.md`)
 - Input validation convention (`conventions/validation.md`)
 - Go project structure convention (`conventions/go-project.md`)
+- Engineering guidelines for LLM/agent coding (`conventions/engineering-guidelines.md`)
 - Error code registry (`errors/error-codes.md`)
 
 ## Design Principles
