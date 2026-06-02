@@ -49,9 +49,6 @@ program
   .command('add')
   .description('Add modules to existing workspace')
   .option('-m, --modules <list>', 'Comma-separated modules to add')
-  .option('-c, --custom <name:ref>', 'Add custom module', (value, previous) => {
-    return previous ? [...previous, value] : [value];
-  })
   .option('--templates-dir <path>', 'Override templates directory')
   .option('--dry-run', 'Show what would be created')
   .action(async (options) => {
