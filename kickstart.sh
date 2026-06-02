@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # =============================================================================
-# spec-center-template kickstart.sh
+# polyrepo-starter kickstart.sh
 # Remote bootstrap: curl | bash one-liner for workspace creation
 # =============================================================================
 
-REPO_URL="https://github.com/{owner}/spec-center-template.git"
+REPO_URL="https://github.com/0xkanglj/polyrepo-starter.git"
 ORIGINAL_DIR=$(pwd)
 TEMP_DIR=$(mktemp -d)
 

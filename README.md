@@ -1,4 +1,4 @@
-# Spec Center Template
+# Polyrepo Starter
 
 Universal scaffold for multi-repo workspace projects. Generates independent Git repositories (spec-center, server, web, mobile, admin) that share conventions through a single source of truth.
 
@@ -7,14 +7,14 @@ Universal scaffold for multi-repo workspace projects. Generates independent Git 
 ### Remote (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/{owner}/spec-center-template/main/kickstart.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0xkanglj/polyrepo-starter/main/kickstart.sh | bash
 ```
 
 ### Local
 
 ```bash
-git clone https://github.com/{owner}/spec-center-template.git
-cd spec-center-template
+git clone https://github.com/0xkanglj/polyrepo-starter.git
+cd polyrepo-starter
 npm install
 node src/cli.js init
 ```
