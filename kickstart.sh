@@ -99,13 +99,24 @@ build_init_flags() {
 }
 
 # ---------------------------------------------------------------------------
+# Run node CLI with stdin from /dev/tty when piped (curl | bash)
+# ---------------------------------------------------------------------------
+run_cli() {
+  if [ -t 0 ]; then
+    node "$@"
+  else
+    node "$@" < /dev/tty
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Auto-detect mode
 # ---------------------------------------------------------------------------
 if find "$ORIGINAL_DIR" -maxdepth 1 -type d -name '*-spec-center' 2>/dev/null | grep -q .; then
   echo "Detected existing workspace. Running 'add' command..."
-  node "$TEMP_DIR/src/cli.js" add --templates-dir "$TEMP_DIR/templates" "$@"
+  run_cli "$TEMP_DIR/src/cli.js" add --templates-dir "$TEMP_DIR/templates" "$@"
 else
   echo "Creating new workspace..."
   build_init_flags
-  node "$TEMP_DIR/src/cli.js" init --templates-dir "$TEMP_DIR/templates" "${INIT_FLAGS[@]+"${INIT_FLAGS[@]}"}" "$@"
+  run_cli "$TEMP_DIR/src/cli.js" init --templates-dir "$TEMP_DIR/templates" "${INIT_FLAGS[@]+"${INIT_FLAGS[@]}"}" "$@"
 fi
