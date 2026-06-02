@@ -8,11 +8,11 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 
 | Module | Role |
 |---|---|
-| `admin` | Admin manager application|
-| `web` | Web application|
-| `mobile` | Mobile application |
-| `server` | Backend service implementation |
+<!-- MODULE:admin -->| `admin` | Admin manager application|
+<!-- MODULE:mobile -->| `mobile` | Mobile application |
+<!-- MODULE:server -->| `server` | Backend service implementation |
 | `spec-center` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
+<!-- MODULE:web -->| `web` | Web application|
 
 > **Adding a New Module**: When a new module directory is created, the following steps MUST be performed:
 > 1. Add the new module entry to the **Module Map** table above (sorted alphabetically).
@@ -72,8 +72,8 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 | Document | Where | Example |
 |---|---|---|
 | Cross-module domain spec (what) | `{{PROJECT}}-spec-center/docs/specs/` | `2026-05-30-feature-design.md` |
-| Server implementation plan (how) | `{{PROJECT}}-server/docs/plans/` | `2026-05-30-feature.md` |
-| Web implementation plan (how) | `{{PROJECT}}-web/docs/plans/` | `2026-05-30-feature.md` |
+<!-- MODULE:server -->| Server implementation plan (how) | `{{PROJECT}}-server/docs/plans/` | `2026-05-30-feature.md` |
+<!-- MODULE:web -->| Web implementation plan (how) | `{{PROJECT}}-web/docs/plans/` | `2026-05-30-feature.md` |
 | API / error-code contract updates | `{{PROJECT}}-spec-center/` (OpenAPI, error-codes) | Updated in spec or alongside server plan — **no** separate spec-center plan unless spec-center-only work |
 
 **Plan structure:**
@@ -90,8 +90,10 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 
 ```
 {{PROJECT}}-spec-center/docs/specs/2026-05-30-feature-design.md   ← SSOT spec
-{{PROJECT}}-server/docs/plans/2026-05-30-feature.md               ← schema, API, tests
-{{PROJECT}}-web/docs/plans/2026-05-30-feature.md                  ← UI; Depends on server plan
+<!-- BEGIN MODULE:server -->{{PROJECT}}-server/docs/plans/2026-05-30-feature.md               ← schema, API, tests
+<!-- END MODULE:server -->
+<!-- BEGIN MODULE:web -->{{PROJECT}}-web/docs/plans/2026-05-30-feature.md                  ← UI; Depends on server plan
+<!-- END MODULE:web -->
 ```
 
 ### Spec Ownership Quick Reference
@@ -184,32 +186,36 @@ workspace/
 │   │   └── error-codes.md        # Business error code registry
 │   └── events/                   # Inter-module event definitions
 │       └── .gitkeep
-├── {{PROJECT}}-server/           # Backend service
+<!-- BEGIN MODULE:server -->├── {{PROJECT}}-server/           # Backend service
 │   ├── AGENTS.md                 # Server-specific conventions
 │   └── docs/
 │       ├── specs/                # Server-specific specifications
 │       │   └── .gitkeep
 │       └── plans/                # Server-specific implementation plans
 │           └── .gitkeep
-├── {{PROJECT}}-web/              # Web application
+<!-- END MODULE:server -->
+<!-- BEGIN MODULE:web -->├── {{PROJECT}}-web/              # Web application
 │   ├── AGENTS.md                 # Web-specific conventions
 │   └── docs/
 │       ├── specs/                # Web-specific specifications
 │       │   └── .gitkeep
 │       └── plans/                # Web-specific implementation plans
 │           └── .gitkeep
-├── {{PROJECT}}-mobile/           # Mobile application
+<!-- END MODULE:web -->
+<!-- BEGIN MODULE:mobile -->├── {{PROJECT}}-mobile/           # Mobile application
 │   ├── AGENTS.md                 # Mobile-specific conventions
 │   └── docs/
 │       ├── specs/                # Mobile-specific specifications
 │       │   └── .gitkeep
 │       └── plans/                # Mobile-specific implementation plans
 │           └── .gitkeep
-└── {{PROJECT}}-admin/            # Admin manager application
+<!-- END MODULE:mobile -->
+<!-- BEGIN MODULE:admin -->└── {{PROJECT}}-admin/            # Admin manager application
     ├── AGENTS.md                 # Admin-specific conventions
     └── docs/
         ├── specs/                # Admin-specific specifications
         │   └── .gitkeep
         └── plans/                # Admin-specific implementation plans
             └── .gitkeep
+<!-- END MODULE:admin -->
 ```
