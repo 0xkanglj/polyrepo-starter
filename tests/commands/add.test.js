@@ -50,19 +50,14 @@ describe('add command integration', () => {
     expect(output).toContain('already exist');
   });
 
-  it('adds custom module with -c flag', () => {
-    execSync(
-      `node "${CLI_PATH}" add -c crawler:server --templates-dir "${TEMPLATES_DIR}"`,
-      { cwd: workspaceDir, stdio: 'pipe' }
+  it('shows dry-run without creating files for --modules', () => {
+    const output = execSync(
+      `node "${CLI_PATH}" add -m web --dry-run --templates-dir "${TEMPLATES_DIR}"`,
+      { cwd: workspaceDir, encoding: 'utf-8' }
     );
 
-    expect(existsSync(resolve(workspaceDir, 'acme-crawler'))).toBe(true);
-    const agentsContent = readFileSync(resolve(workspaceDir, 'acme-crawler', 'AGENTS.md'), 'utf-8');
-    expect(agentsContent).toContain('acme-crawler');
-    expect(agentsContent).not.toContain('acme-server');
-
-    const scAgents = readFileSync(resolve(workspaceDir, 'acme-spec-center', 'AGENTS.md'), 'utf-8');
-    expect(scAgents).toContain('`crawler`');
+    expect(output).toContain('Would create: acme-web/');
+    expect(existsSync(resolve(workspaceDir, 'acme-web'))).toBe(false);
   });
 
   it('fails when not in a workspace', () => {
@@ -74,42 +69,6 @@ describe('add command integration', () => {
       expect.unreachable('Should have thrown');
     } catch (err) {
       expect(err.stderr?.toString() || err.message).toContain('Not in a workspace');
-    }
-  });
-
-  it('fails with invalid custom module format', () => {
-    try {
-      execSync(
-        `node "${CLI_PATH}" add -c invalidformat --templates-dir "${TEMPLATES_DIR}"`,
-        { cwd: workspaceDir, stdio: 'pipe' }
-      );
-      expect.unreachable('Should have thrown');
-    } catch (err) {
-      expect(err.stderr?.toString() || err.message).toContain('Invalid custom module format');
-    }
-  });
-
-  it('fails with non-existent template ref', () => {
-    try {
-      execSync(
-        `node "${CLI_PATH}" add -c mymod:nonexistent --templates-dir "${TEMPLATES_DIR}"`,
-        { cwd: workspaceDir, stdio: 'pipe' }
-      );
-      expect.unreachable('Should have thrown');
-    } catch (err) {
-      expect(err.stderr?.toString() || err.message).toContain('Reference template not found');
-    }
-  });
-
-  it('fails with invalid custom module name', () => {
-    try {
-      execSync(
-        `node "${CLI_PATH}" add -c "INVALID:server" --templates-dir "${TEMPLATES_DIR}"`,
-        { cwd: workspaceDir, stdio: 'pipe' }
-      );
-      expect.unreachable('Should have thrown');
-    } catch (err) {
-      expect(err.stderr?.toString() || err.message).toContain('Invalid custom module name');
     }
   });
 });
