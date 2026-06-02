@@ -28,6 +28,8 @@ Follow the interactive prompts to name your project and select modules.
 my-project-workspace/
 ├── AGENTS.md                  → Points to spec-center AGENTS.md
 ├── CLAUDE.md                  → Points to AGENTS.md
+├── .claude/settings.json      → Claude Code hard-tier deny rules
+├── .opencode/opencode.json    → OpenCode hard-tier deny rules
 ├── my-project-spec-center/    → SSOT repo (specs, conventions, error codes)
 ├── my-project-server/         → Backend service repo
 ├── my-project-web/            → Web application repo
@@ -35,13 +37,18 @@ my-project-workspace/
 └── my-project-admin/          → Admin panel repo
 ```
 
-Each repo is initialized with:
+Each **code module** repo (server, web, mobile, admin) and the **workspace root** are initialized with:
 - `AGENTS.md` — Module role, mandatory specs, tech stack placeholders
 - `CLAUDE.md` — Points to AGENTS.md
+- `.claude/settings.json` — Hard-tier deny rules for Claude Code (secrets, dependencies)
+- `.opencode/opencode.json` — Hard-tier deny rules for OpenCode (same scope as `.cursorignore`)
+- `.cursorignore` / `.cursorindexingignore` — Cursor hard/soft ignore tiers
 - `.gitignore` — Universal IDE/OS/env/build entries
 - `Makefile` — Build task skeleton (help/install/dev/build/test/lint/clean)
 - `.env.example` — Environment variable skeleton
 - `docs/specs/` and `docs/plans/` — Documentation directories
+
+The **spec-center** repo is docs-only: it gets `AGENTS.md`, `CLAUDE.md`, and `.gitignore` only — no agent deny configs (`.claude/`, `.opencode/`), Cursor ignore files, `Makefile`, or `.env.example`.
 
 The spec-center repo also includes:
 - HTTP API convention (`conventions/http-constitution.md`)
