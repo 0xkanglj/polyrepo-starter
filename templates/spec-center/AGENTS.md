@@ -71,15 +71,15 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 
 | Document | Where | Example |
 |---|---|---|
-| Cross-module domain spec (what) | `{{PROJECT}}-spec-center/docs/specs/` | `2026-05-30-feature-design.md` |
-<!-- MODULE:server -->| Server implementation plan (how) | `{{PROJECT}}-server/docs/plans/` | `2026-05-30-feature.md` |
-<!-- MODULE:web -->| Web implementation plan (how) | `{{PROJECT}}-web/docs/plans/` | `2026-05-30-feature.md` |
+| Cross-module domain spec (what) | `{{PROJECT}}-spec-center/docs/specs/` | `2026-06-01-feature-design.md` |
+| Server implementation plan (how) | `{{PROJECT}}-server/docs/plans/` | `2026-06-01-feature.md` |
+| Web implementation plan (how) | `{{PROJECT}}-web/docs/plans/` | `2026-06-01-feature.md` |
 | API / error-code contract updates | `{{PROJECT}}-spec-center/` (OpenAPI, error-codes) | Updated in spec or alongside server plan — **no** separate spec-center plan unless spec-center-only work |
 
 **Plan structure:**
 
 1. **Shared spec first** — Write and approve the cross-module spec in `{{PROJECT}}-spec-center` (API schemas, acceptance criteria, error codes).
-2. **Split plans by module** — Create one plan per module that implements the feature. Use the same date + feature slug (e.g. `2026-05-30-feature.md`) for discoverability.
+2. **Split plans by module** — Create one plan per module that implements the feature. Use the same date + feature slug (e.g. `2026-06-01-feature.md`) for discoverability.
 3. **Declare dependencies** — Each plan MUST link to the SSOT spec and, when applicable, state `Depends on: <other-module-plan>` (e.g. web plan depends on server plan).
 4. **Execute in dependency order** — Typically `{{PROJECT}}-server` → `{{PROJECT}}-web` → `{{PROJECT}}-mobile`. A downstream plan MUST NOT assume upstream API changes exist until the upstream plan is merged or verified.
 5. **No canonical plans in agent temp paths** — Module plans belong in `<module>/docs/plans/`, not in `docs/superpowers/plans/` or other agent-only directories. Agent-generated drafts may start elsewhere but MUST be moved to the module path before execution.
@@ -89,9 +89,9 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 **Example:**
 
 ```
-{{PROJECT}}-spec-center/docs/specs/2026-05-30-feature-design.md   ← SSOT spec
-{{PROJECT}}-server/docs/plans/2026-05-30-feature.md               ← schema, API, tests
-{{PROJECT}}-web/docs/plans/2026-05-30-feature.md                  ← UI; Depends on server plan
+{{PROJECT}}-spec-center/docs/specs/2026-06-01-feature-design.md   ← SSOT spec
+{{PROJECT}}-server/docs/plans/2026-06-01-feature.md               ← schema, API, tests
+{{PROJECT}}-web/docs/plans/2026-06-01-feature.md                  ← UI; Depends on server plan
 ```
 
 ### Spec Ownership Quick Reference
