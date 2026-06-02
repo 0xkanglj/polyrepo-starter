@@ -11,3 +11,6 @@ Thumbs.db
 # Project
 .worktrees/
 .superpowers/
+
+# Dependencies
+node_modules/
