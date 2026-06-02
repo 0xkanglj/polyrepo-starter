@@ -4,6 +4,7 @@ import { globSync } from 'glob';
 import { execSync, execFileSync } from 'child_process';
 import ora from 'ora';
 import { resolveTemplatesDir } from '../utils/path.js';
+import { getModuleRole } from './templates.js';
 
 function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -50,6 +51,16 @@ export function copyAndReplace(templateName, targetDir, vars) {
         new RegExp(`-${escapeRegExp(vars.TEMPLATE_REF)}\\b`, 'g'),
         `-${vars.MODULE_NAME}`
       );
+
+      // Replace role text for custom modules
+      if (vars.ORIGINAL_ROLE) {
+        const capitalizedModuleName = vars.MODULE_NAME.charAt(0).toUpperCase() + vars.MODULE_NAME.slice(1);
+        const newRole = `${capitalizedModuleName} application`;
+        content = content.replace(
+          new RegExp(`^${escapeRegExp(vars.ORIGINAL_ROLE)}$`, 'm'),
+          newRole
+        );
+      }
     }
 
     writeFileSync(filePath, content, 'utf-8');
@@ -74,11 +85,22 @@ export function createModule(templateRef, modDir, projectName, mod) {
   const label = `${projectName}-${mod.name}`;
   const spinner = ora(`Creating ${label}...`).start();
   try {
-    copyAndReplace(templateRef, modDir, {
+    const vars = {
       PROJECT: projectName,
       MODULE_NAME: mod.isCustom ? mod.name : null,
       TEMPLATE_REF: mod.isCustom ? mod.templateRef : null,
-    });
+    };
+
+    // For custom modules, include the original role so it can be replaced
+    if (mod.isCustom) {
+      try {
+        vars.ORIGINAL_ROLE = getModuleRole(mod.templateRef);
+      } catch {
+        vars.ORIGINAL_ROLE = null;
+      }
+    }
+
+    copyAndReplace(templateRef, modDir, vars);
     gitInit(modDir, mod.name);
     spinner.succeed(`Created ${label}`);
   } catch (err) {

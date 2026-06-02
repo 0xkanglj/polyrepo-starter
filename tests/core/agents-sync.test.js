@@ -14,7 +14,7 @@ const TEMPLATE = `# Spec Center (SSOT)
 
 | Module | Role |
 |---|---|
-<!-- MODULE:admin -->| \`admin\` | Admin manager application|
+<!-- MODULE:admin -->| \`admin\` | Admin application|
 <!-- MODULE:mobile -->| \`mobile\` | Mobile application |
 <!-- MODULE:server -->| \`server\` | Backend service implementation |
 | \`spec-center\` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
@@ -159,8 +159,10 @@ describe('syncAgentsMd', () => {
     expect(content).toContain('acme-server/');
     expect(content).toContain('acme-crawler/');
 
-    // Custom module uses template's role description
+    // Built-in module uses template's role description
     expect(content).toContain('Server application');
+    // Custom module uses capitalized module name as role
+    expect(content).toContain('Crawler application');
 
     // Markers should be stripped
     expect(content).not.toMatch(/<!-- MODULE:/);
@@ -269,10 +271,10 @@ workspace/
     const content = readFileSync(agentsPath, 'utf-8');
 
     expect(content).toContain('`crawler`');
-    expect(content).toContain('Server application');
+    expect(content).toContain('Crawler application');
 
     // Tree entry should have role comment
     expect(content).toContain('acme-crawler/');
-    expect(content).toContain('# Server application');
+    expect(content).toContain('# Crawler application');
   });
 });

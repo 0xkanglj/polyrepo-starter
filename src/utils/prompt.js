@@ -85,7 +85,7 @@ export async function promptAddOneModule(existingModules) {
   }
 
   const templateName = await select({
-    message: '选择要添加的模块:',
+    message: 'Select a module to add:',
     choices: templates.map((t) => ({ name: t, value: t })),
   });
 
@@ -107,7 +107,7 @@ export async function promptModuleName(templateName, existingModules, sessionAdd
   const hasDefault = !templateNameTaken;
   let hintMessage = '';
   if (templateNameTaken) {
-    hintMessage = `⚠ 模块 "${templateName}" 已存在，请输入不同的名称`;
+    hintMessage = `⚠ Module "${templateName}" already exists — please enter a different name`;
   }
 
   // Validation function
@@ -116,7 +116,7 @@ export async function promptModuleName(templateName, existingModules, sessionAdd
 
     // Non-empty
     if (!name) {
-      return '模块名不能为空';
+      return 'Module name cannot be empty';
     }
 
     // Regex check: same rules as project name
@@ -127,7 +127,7 @@ export async function promptModuleName(templateName, existingModules, sessionAdd
 
     // Uniqueness against workspace + session
     if (allTaken.includes(name)) {
-      return `模块名 "${name}" 已被使用`;
+      return `Module name "${name}" is already taken`;
     }
 
     return true;
@@ -136,8 +136,8 @@ export async function promptModuleName(templateName, existingModules, sessionAdd
   // Prompt loop: if validation fails, re-prompt
   const name = await input({
     message: hintMessage
-      ? `${hintMessage}\n  模块名:`
-      : '模块名:',
+      ? `${hintMessage}\n  Module name:`
+      : 'Module name:',
     default: hasDefault ? templateName : undefined,
     validate: validateModuleName,
   });

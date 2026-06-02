@@ -36,7 +36,8 @@
 │   │   └── postgres.go
 │   └── validator/
 │       └── validator.go
-├── migrations/
+├── db/
+|   └── migrations/
 ├── docs/
 │   ├── specs/
 │   └── plans/

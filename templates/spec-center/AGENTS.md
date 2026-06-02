@@ -8,7 +8,7 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 
 | Module | Role |
 |---|---|
-<!-- MODULE:admin -->| `admin` | Admin manager application|
+<!-- MODULE:admin -->| `admin` | Admin application|
 <!-- MODULE:mobile -->| `mobile` | Mobile application |
 <!-- MODULE:server -->| `server` | Server application |
 | `spec-center` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
@@ -208,7 +208,7 @@ workspace/
 │       └── plans/                # Mobile-specific implementation plans
 │           └── .gitkeep
 <!-- END MODULE:mobile -->
-<!-- BEGIN MODULE:admin -->└── {{PROJECT}}-admin/            # Admin manager application
+<!-- BEGIN MODULE:admin -->└── {{PROJECT}}-admin/            # Admin application
     ├── AGENTS.md                 # Admin-specific conventions
     └── docs/
         ├── specs/                # Admin-specific specifications

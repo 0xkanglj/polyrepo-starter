@@ -1,7 +1,7 @@
 # {{PROJECT}}-admin
 
 ## Role
-Admin manager application
+Admin application
 
 ## Mandatory Specs
 - [HTTP Constitution](../{{PROJECT}}-spec-center/conventions/http-constitution.md)

@@ -53,7 +53,7 @@ node src/cli.js add [选项]
 | server | 可选 | 后端服务 |
 | web | 可选 | Web 应用 |
 | mobile | 可选 | 移动端应用 |
-| admin | 可选 | 管理后台应用 |
+| admin | 可选 | 管理应用 |
 
 ## 生成目录结构
 

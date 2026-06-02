@@ -70,21 +70,21 @@ describe('promptModuleName', () => {
     input.mockResolvedValueOnce('');
     const result = await promptModuleName('server', [], []);
     const validateFn = input.mock.calls[0][0].validate;
-    expect(validateFn('')).toBe('模块名不能为空');
+    expect(validateFn('')).toBe('Module name cannot be empty');
   });
 
   it('rejects name that conflicts with existing module', async () => {
     input.mockResolvedValueOnce('server');
     await promptModuleName('server', ['server'], []);
     const validateFn = input.mock.calls[0][0].validate;
-    expect(validateFn('server')).toBe('模块名 "server" 已被使用');
+    expect(validateFn('server')).toBe('Module name "server" is already taken');
   });
 
   it('rejects name that conflicts with session-added module', async () => {
     input.mockResolvedValueOnce('crawler');
     await promptModuleName('server', [], ['crawler']);
     const validateFn = input.mock.calls[0][0].validate;
-    expect(validateFn('crawler')).toBe('模块名 "crawler" 已被使用');
+    expect(validateFn('crawler')).toBe('Module name "crawler" is already taken');
   });
 
   it('rejects invalid name format', async () => {

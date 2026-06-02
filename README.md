@@ -53,7 +53,7 @@ Interactive mode prompts you to select a template, then optionally rename the mo
 | server | Optional | Backend service |
 | web | Optional | Web application |
 | mobile | Optional | Mobile application |
-| admin | Optional | Admin manager application |
+| admin | Optional | Admin application |
 
 ## What Gets Generated
 

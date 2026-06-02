@@ -18,8 +18,7 @@
 |------|------|------|
 | GET | 查询 | ✅ |
 | POST | 创建/动作 | ❌ |
-| PUT | 全量更新 | ✅ |
-| PATCH | 部分更新 | ⚠️ |
+| PUT | 全量/部分更新 | ⚠️ |
 | DELETE | 删除 | ✅ |
 
 **禁止：** `POST /getUser`、`POST /updateUser`、`POST /deleteUser`

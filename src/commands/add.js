@@ -148,7 +148,7 @@ export async function addCommand(options) {
       existingModules.push(mod.name);
 
       const more = await confirm({
-        message: '继续添加下一个模块？',
+        message: 'Add another module?',
         default: false,
       });
       if (!more) break;

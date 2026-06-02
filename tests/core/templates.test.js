@@ -46,7 +46,7 @@ describe('templates', () => {
 
     it('returns Role from admin template', () => {
       const role = getModuleRole('admin');
-      expect(role).toBe('Admin manager application');
+      expect(role).toBe('Admin application');
     });
   });
 
