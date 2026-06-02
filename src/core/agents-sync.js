@@ -57,8 +57,9 @@ export function syncAgentsMd(workspaceDir, projectName, modules) {
   const templateContent = readFileSync(srcPath, 'utf-8');
   const selectedModuleNames = modules.map(m => m.name);
   const filtered = filterAgentsMd(templateContent, selectedModuleNames);
+  const replaced = filtered.replace(/\{\{PROJECT\}\}/g, projectName);
   const destPath = join(workspaceDir, `${projectName}-spec-center`, 'AGENTS.md');
-  writeFileSync(destPath, filtered, 'utf-8');
+  writeFileSync(destPath, replaced, 'utf-8');
 }
 
 export function mergeAgentsMd(workspaceDir, projectName, newModules) {

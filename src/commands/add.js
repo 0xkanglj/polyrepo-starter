@@ -94,6 +94,8 @@ export async function addCommand(options) {
     let toAdd;
     if (options.modules) {
       toAdd = parseModuleList(options.modules);
+    } else if (options.custom) {
+      toAdd = [];
     } else {
       if (available.length === 0) {
         info('All standard modules are already installed.');
