@@ -1,16 +1,16 @@
 # Input Validation Convention v1.0
 
-> 适用：所有 Go 微服务 | 目标：统一请求参数校验规则、错误格式和实现方式
+> Applies to: All Go microservices | Goal: Standardize request parameter validation rules, error formats, and implementation patterns
 
-## 一、校验库
+## 1. Validation Library
 
-**强制：** 所有 Go 服务使用 `github.com/go-playground/validator/v10`
+**Mandatory:** All Go services must use `github.com/go-playground/validator/v10`
 
-## 二、使用方式
+## 2. Usage
 
 ### 2.1 Request Struct Tag
 
-请求 struct 通过 `validate` tag 声明校验规则：
+Declare validation rules on request structs via the `validate` tag:
 
 ```go
 type loginRequest struct {
@@ -19,9 +19,9 @@ type loginRequest struct {
 }
 ```
 
-### 2.2 Handler 调用
+### 2.2 Handler Invocation
 
-JSON 解码后，调用 `ValidateStruct()` 进行校验：
+After JSON decoding, call `ValidateStruct()` to perform validation:
 
 ```go
 var req loginRequest
@@ -36,52 +36,52 @@ if err := ValidateStruct(&req); err != nil {
 }
 ```
 
-### 2.3 ValidateStruct 实现
+### 2.3 ValidateStruct Implementation
 
-每个服务提供 `ValidateStruct(v any) *AppError` 工具函数，职责：
+Each service provides a `ValidateStruct(v any) *AppError` utility function with the following responsibilities:
 
-- 调用 `validator.New(validator.WithRequiredStructEnabled())`
-- 注册 JSON tag 名映射（错误信息使用 camelCase 字段名）
-- 将 `validator.ValidationErrors` 转换为统一的 `*AppError`
-- 单例模式，懒初始化
+- Instantiate via `validator.New(validator.WithRequiredStructEnabled())`
+- Register JSON tag name mapping (error messages use camelCase field names)
+- Convert `validator.ValidationErrors` to a unified `*AppError`
+- Singleton pattern with lazy initialization
 
-## 三、标准 Validate Tags
+## 3. Standard Validate Tags
 
-### 3.1 常用 Tags
+### 3.1 Common Tags
 
-| Tag | 说明 | 示例 |
-|-----|------|------|
-| `required` | 必填，零值不通过 | `validate:"required"` |
-| `email` | 合法邮箱格式 | `validate:"email"` |
-| `url` | 合法 URL | `validate:"url"` |
-| `min=N` | 字符串最小长度 / 数字最小值 | `validate:"min=1"` |
-| `max=N` | 字符串最大长度 / 数字最大值 | `validate:"max=100"` |
-| `len=N` | 精确长度 | `validate:"len=11"` |
-| `oneof=A B C` | 枚举值 | `validate:"oneof=ios android web"` |
-| `uuid` | UUID 格式 | `validate:"uuid"` |
-| `omitempty` | 仅在字段非零值时校验后续规则 | `validate:"omitempty,min=1"` |
+| Tag | Description | Example |
+|-----|-------------|---------|
+| `required` | Mandatory; zero values rejected | `validate:"required"` |
+| `email` | Valid email format | `validate:"email"` |
+| `url` | Valid URL | `validate:"url"` |
+| `min=N` | Minimum string length / numeric value | `validate:"min=1"` |
+| `max=N` | Maximum string length / numeric value | `validate:"max=100"` |
+| `len=N` | Exact length | `validate:"len=11"` |
+| `oneof=A B C` | Enumerated values | `validate:"oneof=ios android web"` |
+| `uuid` | UUID format | `validate:"uuid"` |
+| `omitempty` | Skip subsequent rules when the field is a zero value | `validate:"omitempty,min=1"` |
 
 > **Note:** Database IDs use BIGSERIAL/BIGINT (int64), not UUID. For ID path parameters, parse with `strconv.ParseInt(..., 10, 64)` and validate as integer. The `uuid` tag is only applicable to non-ID fields that use UUID format (e.g., external identifiers).
 
-### 3.2 组合规则
+### 3.2 Combining Rules
 
-多个规则用逗号分隔：
+Multiple rules are comma-separated:
 
 ```go
 Nickname string `validate:"required,min=1,max=100"`
 ```
 
-`omitempty` 与 `required` 互斥，不可同时使用。可选字段用 `omitempty` 前缀。
+`omitempty` and `required` are mutually exclusive. For optional fields, prefix with `omitempty`.
 
-## 四、错误响应格式
+## 4. Error Response Format
 
-校验失败统一返回：
+Validation failures uniformly return:
 
 - **HTTP Status**: `400 Bad Request`
-- **业务码**: `1001`（参数错误，参见 [HTTP Constitution](http-constitution.md) §三 错误码范围）
-- **message**: 人类可读的字段级错误描述，多条错误用 `; ` 分隔
+- **Business Code**: `1001` (parameter error — see [HTTP Constitution](http-constitution.md) §3 for error code ranges)
+- **message**: Human-readable field-level error descriptions; multiple errors separated by `; `
 
-**示例：**
+**Example:**
 
 ```json
 {
@@ -90,43 +90,43 @@ Nickname string `validate:"required,min=1,max=100"`
 }
 ```
 
-**错误信息格式规则：**
+**Error Message Format Rules:**
 
-| 校验规则 | 错误信息模板 |
-|----------|-------------|
+| Validation Rule | Error Message Template |
+|-----------------|----------------------|
 | `required` | `{field} is required` |
 | `min` | `{field} must be at least {param} characters` |
 | `max` | `{field} must be at most {param} characters` |
 | `email` | `{field} must be a valid email` |
 | `url` | `{field} must be a valid URL` |
-| 其他 | `{field} {tag} validation failed` |
+| Other | `{field} {tag} validation failed` |
 
-其中 `{field}` 使用 JSON tag 名（camelCase），不使用 Go struct 字段名。
+`{field}` uses the JSON tag name (camelCase), not the Go struct field name.
 
-## 五、特殊类型处理
+## 5. Special Type Handling
 
-### 5.1 Optional / Patch 语义字段
+### 5.1 Optional / PATCH-Semantic Fields
 
-PATCH 请求中"不传 = 不修改，null = 清空"的三态字段（如 `OptionalString`），不适合直接使用 `validate` tag。处理方式：
+For PATCH requests, three-state fields ("omitted = no change, null = clear") such as `OptionalString` are not suited for direct `validate` tags. Handle them as follows:
 
-- `OptionalString` 等自定义类型不加 `validate` tag
-- 解析后通过手写逻辑校验内部值（如长度、格式）
-- 仍然调用 `ValidateStruct()` 处理 struct 中其他带 tag 的字段
+- Do not add `validate` tags to custom types like `OptionalString`
+- After parsing, validate internal values through hand-written logic (e.g., length, format)
+- Still call `ValidateStruct()` to process other tagged fields on the struct
 
-### 5.2 URL Param / Query Param
+### 5.2 URL Params / Query Params
 
-路径参数和查询参数不在 request body struct 中，校验方式：
+Path parameters and query parameters are not part of the request body struct. Validate them as follows:
 
-- 路径参数：在 handler 中手动解析和校验
-- 查询参数：可定义 query struct 并加 `validate` tag，手动 `r.URL.Query().Get()` 后赋值再校验
+- **Path parameters**: Parse and validate manually in the handler
+- **Query parameters**: Define a query struct with `validate` tags, manually assign values from `r.URL.Query().Get()`, then validate
 
-### 5.3 Header 校验
+### 5.3 Header Validation
 
-请求头校验（如 `X-Client-Platform`）在中间件中处理，不使用 `validate` tag。
+Request header validation (e.g., `X-Client-Platform`) is handled in middleware, not via `validate` tags.
 
-## 六、禁止清单
+## 6. Prohibited Patterns
 
-- ❌ 在 handler 中手写 `if field == ""` 替代 `validate:"required"` 的场景
-- ❌ 使用 Go struct 字段名作为错误信息（应用 JSON tag camelCase 名）
-- ❌ 校验错误返回非 1001 业务码
-- ❌ 在 `OptionalString` 等自定义类型上直接加 `validate` tag
+- ❌ Writing manual `if field == ""` checks in handlers instead of using `validate:"required"`
+- ❌ Using Go struct field names in error messages (use JSON tag camelCase names instead)
+- ❌ Returning a business code other than `1001` for validation errors
+- ❌ Adding `validate` tags directly to custom types like `OptionalString`

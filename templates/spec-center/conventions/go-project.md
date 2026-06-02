@@ -1,8 +1,8 @@
 # Go Project Structure Convention v1.0
 
-> 适用：所有 Go 后端服务 | 目标：统一项目结构，降低跨项目理解成本
+> Applies to: All Go backend services | Goal: Standardize project structure to reduce cross-project cognitive overhead
 
-## 目录结构
+## Directory Structure
 
 ```
 {{PROJECT}}-server/
@@ -48,40 +48,40 @@
 └── CLAUDE.md
 ```
 
-## `internal/` vs `pkg/` 区分原则
+## `internal/` vs `pkg/` Guidelines
 
-| 位置 | 规则 | 示例 |
-|------|------|------|
-| `pkg/` | 可被其他 Go 项目引用，API 必须稳定 | apperror、response、database、validator |
-| `internal/` | 当前项目专属，不可外部引用 | config、server、handler、middleware、repository、service、model |
+| Location | Rule | Examples |
+|----------|------|----------|
+| `pkg/` | Safe for import by other Go projects; API must remain stable | apperror, response, database, validator |
+| `internal/` | Project-private; not importable externally | config, server, handler, middleware, repository, service, model |
 
-判断标准：如果这个包在另一个 Go 服务中可以直接 `import` 使用，放 `pkg/`；如果包含项目特定类型或常量，放 `internal/`。
+**Decision rule:** If a package can be directly `import`-ed and used in another Go service, place it in `pkg/`. If it contains project-specific types or constants, place it in `internal/`.
 
-## Server 生命周期
+## Server Lifecycle
 
-`internal/server/server.go` 定义 Server 结构体：
+`internal/server/server.go` defines the Server struct:
 
-- `New(cfg, db)` — 构造函数，接收依赖，内部调用 `registerRoutes()`
-- `Start(addr)` — 启动 HTTP 服务，支持 graceful shutdown
-- `Shutdown(ctx)` — 信号中断时优雅关闭连接
+- `New(cfg, db)` — Constructor; accepts dependencies, internally calls `registerRoutes()`
+- `Start(addr)` — Starts the HTTP server with graceful shutdown support
+- `Shutdown(ctx)` — Gracefully closes connections on signal interruption
 
-`cmd/server/main.go` 职责：加载配置 → 初始化数据库 → 构建 Server → 监听信号 → Start。
+`cmd/server/main.go` responsibilities: load config → initialize database → construct Server → listen for signals → Start.
 
-## Router 注册
+## Router Registration
 
-`internal/server/routes.go` 集中管理所有路由：
+`internal/server/routes.go` centrally manages all routes:
 
-- 按领域分组，带注释
-- Middleware 按层级应用：全局 > 路由组 > 单路由
-- API 版本前缀 `/v1`
-- Health check 路由在版本前缀外
+- Grouped by domain with section comments
+- Middleware applied by layer: global → route group → individual route
+- API version prefix `/v1`
+- Health check routes placed outside the version prefix
 
-## 分层架构
+## Layered Architecture
 
-| 层 | 职责 | 可调用 |
-|---|---|---|
-| Handler | HTTP 请求解析、参数校验、响应序列化 | Service |
-| Service | 业务逻辑编排、事务管理 | Repository |
-| Repository | SQL 查询、数据映射 | Database |
+| Layer | Responsibility | May Call |
+|-------|---------------|----------|
+| Handler | HTTP request parsing, input validation, response serialization | Service |
+| Service | Business logic orchestration, transaction management | Repository |
+| Repository | SQL queries, data mapping | Database |
 
-禁止跨层调用：Handler 不直接访问 Repository。
+Cross-layer calls are prohibited: Handlers must not access Repositories directly.

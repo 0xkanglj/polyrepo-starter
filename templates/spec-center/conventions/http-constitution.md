@@ -1,92 +1,92 @@
 # HTTP Constitution v1.0
 
-> 适用：所有 HTTP 服务 / 微服务 / 对外 API | 目标：统一接口设计，提高一致性、可维护性、性能与可观测性
+> Applies to: All HTTP services / microservices / external APIs | Goal: Standardize API design for consistency, maintainability, performance, and observability
 
-## 一、设计原则
+## 1. Design Principles
 
-- **一致性**：遵循统一结构与命名
-- **语义清晰**：正确使用 HTTP 方法与状态码
-- **可观测**：每个请求可追踪（traceId）
-- **安全**：不暴露内部实现
-- **向后兼容**：不允许破坏性变更
+- **Consistency**: Follow unified structure and naming conventions
+- **Semantic clarity**: Use HTTP methods and status codes correctly
+- **Observability**: Every request must be traceable (traceId)
+- **Security**: Never expose internal implementation details
+- **Backward compatibility**: Breaking changes are not allowed
 
-## 二、HTTP 基础规范
+## 2. HTTP Fundamentals
 
-**方法语义（强制）：**
+**Method Semantics (mandatory):**
 
-| 方法 | 语义 | 幂等 |
-|------|------|------|
-| GET | 查询 | ✅ |
-| POST | 创建/动作 | ❌ |
-| PUT | 全量/部分更新 | ⚠️ |
-| DELETE | 删除 | ✅ |
+| Method | Semantics | Idempotent |
+|--------|-----------|------------|
+| GET | Retrieve | ✅ |
+| POST | Create / Action | ❌ |
+| PUT | Full / Partial update | ⚠️ |
+| DELETE | Delete | ✅ |
 
-**禁止：** `POST /getUser`、`POST /updateUser`、`POST /deleteUser`
+**Prohibited:** `POST /getUser`, `POST /updateUser`, `POST /deleteUser`
 
-**状态码：** 成功 200/201/204；客户端错误 400/401/403/404/409；服务端错误 500/503
+**Status Codes:** Success 200/201/204; Client errors 400/401/403/404/409; Server errors 500/503
 
-**Content-Type：** `application/json; charset=utf-8`
+**Content-Type:** `application/json; charset=utf-8`
 
-## 三、统一响应结构
+## 3. Unified Response Structure
 
-**成功：**
+**Success:**
 
 ```json
 { "code": 0, "message": "ok", "data": {} }
 ```
 
-**错误：**
+**Error:**
 
 ```json
-{ "code": 1001, "message": "参数错误", "details": "email invalid" }
+{ "code": 1001, "message": "parameter error", "details": "email invalid" }
 ```
 
-**字段：** code(业务码)、message(描述)、data(数据)
+**Fields:** code (business code), message (description), data (payload)
 
-**错误码范围：** 参数错误 1000-1999 | 认证错误 2000-2999 | 权限错误 3000-3999 | 业务错误 4000-4999 | 系统错误 5000+
+**Error Code Ranges:** Parameter errors 1000–1999 | Authentication errors 2000–2999 | Authorization errors 3000–3999 | Business errors 4000–4999 | System errors 5000+
 
-## 四、请求体规范
+## 4. Request Body Convention
 
-- 请求体只含业务数据，不允许额外包装（如 `{"data": {}}`）
-- PUT = 全量覆盖，PATCH = 局部更新
-- 不传 = 不修改，null = 清空
+- Request bodies must contain only business data — no extra wrappers (e.g., `{"data": {}}`)
+- PUT = full replacement / partial update
+- Omitting a field = no change; `null` = clear the value
 
-## 五、字段命名
+## 5. Field Naming
 
-- API 层强制 camelCase（`userName` ✅ `user_name` ❌）
-- 禁止混用命名风格
+- camelCase is mandatory at the API layer (`userName` ✅ `user_name` ❌)
+- Mixed naming styles are prohibited
 
-## 六、分页规范
+## 6. Pagination
 
-**Offset（默认）：** `GET /resources?page=1&pageSize=20`
+**Offset (default):** `GET /resources?page=1&pageSize=20`
 
 ```json
 { "code": 0, "data": { "list": [], "pagination": { "page": 1, "pageSize": 20, "total": 100, "hasMore": true } } }
 ```
 
-规则：page 从 1 开始、pageSize ≤ 100、必须返回 hasMore、必须支持排序
+Rules: `page` starts at 1, `pageSize` ≤ 100, `hasMore` is required, sorting must be supported
 
-**排序：** `GET /resources?sortBy=createdAt&order=desc`
+**Sorting:** `GET /resources?sortBy=createdAt&order=desc`
 
-**Cursor（高性能）：** `GET /resources?cursor=xxx&limit=20`
+**Cursor (high-performance):** `GET /resources?cursor=xxx&limit=20`
 
 ```json
 { "code": 0, "data": { "list": [], "nextCursor": "xxx", "hasMore": true } }
 ```
 
-**必须稳定排序：** `ORDER BY created_at DESC, id DESC`
+**Stable sort required:** `ORDER BY created_at DESC, id DESC`
 
-**禁止：** 无分页结构、无排序分页、无限 pageSize
+**Prohibited:** No pagination structure, paginated results without sorting, unbounded pageSize
 
-## 七、数据库规范
+## 7. Database Convention
 
-- 命名：snake_case（如 `users`、`created_at`、`order_items`）
-- 主键：`id`（自增或雪花ID）；时间字段：`created_at`、`updated_at`
-- 分页实现 Offset：`LIMIT :pageSize OFFSET (:page-1)*:pageSize`；Cursor（推荐）：`WHERE id < :last_id ORDER BY id DESC LIMIT :limit`
-- 分页字段、排序字段必须有索引
-- 禁止：深分页（大 offset）、无索引排序
+- Naming: snake_case (e.g., `users`, `created_at`, `order_items`)
+- Primary key: `id` (auto-increment or snowflake ID); Timestamps: `created_at`, `updated_at`
+- Offset pagination: `LIMIT :pageSize OFFSET (:page-1)*:pageSize`; Cursor (recommended): `WHERE id < :last_id ORDER BY id DESC LIMIT :limit`
+- Pagination and sort columns must be indexed
+- Prohibited: Deep pagination (large offset), sorting without indexes
 
-## 八、Header 规范
+## 8. Headers
 
 ```text
 Authorization: Bearer <token>
@@ -94,31 +94,31 @@ X-Trace-Id: xxx
 X-Request-Id: xxx
 ```
 
-### 客户端请求头（所有 /v1/ 接口必须携带）
+### Client Request Headers (required for all /v1/ endpoints)
 
-| Header | 必填 | 说明 | 合法值 | 示例 |
-|--------|------|------|--------|------|
-| X-Client-Platform | 是 | 客户端平台 | ios, android, web | ios |
-| X-Client-Version | 是 | 应用版本号,语义化版本 X.Y.Z | `^\d+\.\d+\.\d+$` | 1.2.0 |
-| X-Client-Language | 是 | 客户端语言,BCP 47 标签 | `^[a-z]{2}(-[a-z]{2})?$` | zh-cn |
+| Header | Required | Description | Valid Values | Example |
+|--------|----------|-------------|--------------|---------|
+| X-Client-Platform | Yes | Client platform | ios, android, web | ios |
+| X-Client-Version | Yes | App version, semantic versioning X.Y.Z | `^\d+\.\d+\.\d+$` | 1.2.0 |
+| X-Client-Language | Yes | Client language, BCP 47 tag | `^[a-z]{2}(-[a-z]{2})?$` | zh-cn |
 
-缺失或非法时返回 HTTP 400,错误码 1001。非 /v1/ 路径(如 /health、/webhooks)不做校验。
+Missing or invalid headers return HTTP 400 with error code 1001. Non-`/v1/` paths (e.g., `/health`, `/webhooks`) are exempt from validation.
 
-## 九、安全规范
+## 9. Security
 
-强制 HTTPS | 输入校验 | 不返回敏感信息 | 防 SQL 注入/XSS
+Enforce HTTPS | Input validation | Never return sensitive data | Prevent SQL injection / XSS
 
-## 十、可观测性
+## 10. Observability
 
-日志（结构化）| 指标（QPS/RT）| Trace（traceId）
+Structured logging | Metrics (QPS / latency) | Distributed tracing (traceId)
 
-## 十一、API 版本控制
+## 11. API Versioning
 
 `/v1/users`
 
-## 十二、幂等性
+## 12. Idempotency
 
-> 防止网络重试导致的重复写操作（重复下单、重复创建客户等）。
+> Prevent duplicate write operations caused by network retries (duplicate orders, duplicate customer creation, etc.).
 
 ### Header
 
@@ -126,120 +126,120 @@ X-Request-Id: xxx
 Idempotency-Key: <uuid>
 ```
 
-- Opt-in：仅在客户端发送 `Idempotency-Key` header 时激活，不发送则走正常流程。
-- Key 格式：**任意合法 UUID**（推荐 v7，小写，带连字符）。格式无效返回 `400` + code `4091`。
+- Opt-in: Activated only when the client sends an `Idempotency-Key` header. Requests without it follow the normal flow.
+- Key format: **Any valid UUID** (v7 recommended, lowercase, with hyphens). Invalid format returns `400` + code `4091`.
 
-### 行为
+### Behavior
 
-| 场景 | 行为 |
-|------|------|
-| 首次请求（key 不存在） | 执行 handler，成功（2xx）存储响应，失败删除 key |
-| 重复请求（key 已完成） | 返回存储的原始响应（status + headers + body），附加 `X-Idempotent-Replayed: true` |
-| 并发请求（key pending） | 返回 `409 Conflict` + code `4090` |
-| 相同 key + 不同 request body | 返回 `409 Conflict` + code `4090`（防误用） |
-| 请求失败后重试 | 原 key 已删除，可用相同 key 重新发起 |
+| Scenario | Behavior |
+|----------|----------|
+| First request (key not found) | Execute handler; on success (2xx) store the response; on failure delete the key |
+| Duplicate request (key already completed) | Return the stored original response (status + headers + body) with an additional `X-Idempotent-Replayed: true` header |
+| Concurrent request (key pending) | Return `409 Conflict` + code `4090` |
+| Same key + different request body | Return `409 Conflict` + code `4090` (prevents key misuse) |
+| Retry after a failed request | Original key has been deleted; the same key can be reused for a new attempt |
 
-### 适用范围
+### Scope
 
-- 中间件挂在 `/v1` 路由组，对所有写端点生效。
-- 仅对携带 `Idempotency-Key` header 的请求生效，对 GET/HEAD 请求无意义但仍不阻止。
+- The middleware is mounted on the `/v1` route group and applies to all write endpoints.
+- It only activates for requests carrying the `Idempotency-Key` header. GET/HEAD requests are unaffected but not blocked.
 
-## 十三、兼容性原则
+## 13. Compatibility Principles
 
-新增字段 ✅ | 删除字段 ❌ | 修改类型 ❌
+Add fields ✅ | Remove fields ❌ | Change types ❌
 
-## 十四、禁止清单
+## 14. Prohibited Patterns
 
-混用命名风格 | 滥用 POST | 返回非标准结构 | 无 traceId | 不分页的大列表接口
+Mixed naming styles | Misuse of POST | Non-standard response structures | Missing traceId | Unpaginated list endpoints
 
-## 十五、时间规范
+## 15. Time Convention
 
-> 目标：统一时间表达、存储与传输，避免跨时区与序列化问题
+> Goal: Standardize time representation, storage, and transmission to avoid timezone and serialization issues
 
-**核心原则（强制）：** 统一使用 UTC | API 使用 ISO 8601 以 `Z` 结尾，推荐含毫秒 | 数据库存 TIMESTAMPTZ | 严禁时区歧义
+**Core Principles (mandatory):** Always use UTC | API uses ISO 8601 ending with `Z`, milliseconds recommended | Store as TIMESTAMPTZ in the database | No timezone ambiguity
 
-### API 时间格式（强制）
+### API Time Format (mandatory)
 
-格式：`YYYY-MM-DDTHH:mm:ss[.SSS]Z`，统一 UTC（`Z` 结尾），推荐含毫秒
+Format: `YYYY-MM-DDTHH:mm:ss[.SSS]Z`, always UTC (ending with `Z`), milliseconds recommended
 
 ✅ `"createdAt": "2026-03-30T20:00:00.123Z"`
-❌ `"2026-03-30 12:00:00"` | `"03/30/2026"` | `1711800000`（默认禁止时间戳）
+❌ `"2026-03-30 12:00:00"` | `"03/30/2026"` | `1711800000` (timestamps prohibited by default)
 
-**字段命名：** createdAt(创建) | updatedAt(更新) | deletedAt(删除)
+**Field Naming:** createdAt (creation) | updatedAt (update) | deletedAt (soft delete)
 
-### 数据库存储
+### Database Storage
 
-统一原则：数据库存储必须表示 UTC 时间点
+Core principle: Database storage must always represent a UTC point in time
 
-**PostgreSQL（强制）：**
+**PostgreSQL (mandatory):**
 
 ```sql
 created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 ```
 
-禁止 `TIMESTAMP WITHOUT TIME ZONE`
+`TIMESTAMP WITHOUT TIME ZONE` is prohibited
 
-**MySQL（强制）：**
+**MySQL (mandatory):**
 
 ```sql
 created_at DATETIME(3) NOT NULL
 updated_at DATETIME(3) NOT NULL
 ```
 
-- 应用层使用 `time.Now().UTC()`、数据库连接 `SET TIMEZONE 'UTC'`
-- 不推荐 `TIMESTAMP`（自动时区转换行为不一致、范围限制 1970~2038、隐式行为多）
+- Application layer uses `time.Now().UTC()`, database connection sets `SET TIMEZONE 'UTC'`
+- `TIMESTAMP` type is not recommended (inconsistent automatic timezone conversion, range limited to 1970–2038, many implicit behaviors)
 
-**对比：**
+**Comparison:**
 
-| 特性 | PostgreSQL | MySQL |
-|------|-----------|-------|
-| 推荐类型 | timestamptz | DATETIME(3) |
-| 存 UTC | ✅ | ✅（靠应用） |
-| 自动时区转换 | ✅ | ⚠️（仅 TIMESTAMP） |
+| Feature | PostgreSQL | MySQL |
+|---------|-----------|-------|
+| Recommended type | timestamptz | DATETIME(3) |
+| Stores UTC | ✅ | ✅ (application-enforced) |
+| Automatic timezone conversion | ✅ | ⚠️ (only for TIMESTAMP) |
 
-### 时间流转（端到端）
+### End-to-End Time Flow
 
-数据库(UTC session) → 后端(time.Now().UTC()) → API(ISO 8601 Z) → 前端(直接使用)
+Database (UTC session) → Backend (`time.Now().UTC()`) → API (ISO 8601 Z) → Frontend (use as-is)
 
-### 请求体时间
+### Request Body Time
 
-必须：`"startAt": "2026-03-30T20:00:00Z"` ❌ `"2026-03-30 12:00:00"`
+Required: `"startAt": "2026-03-30T20:00:00Z"` ❌ `"2026-03-30 12:00:00"`
 
-### 排序与分页
+### Sorting and Pagination
 
-所有分页必须：`ORDER BY created_at DESC, id DESC`
+All paginated queries must use: `ORDER BY created_at DESC, id DESC`
 
-### 特殊场景（允许例外）
+### Special Cases (exceptions allowed)
 
-- 纯本地时间业务（营业时间/日历）：可用 `TIME` 类型
-- 高性能内部接口：可用毫秒时间戳 `1711800000000`，须文档说明
+- Pure local-time business logic (business hours / calendars): `TIME` type is acceptable
+- High-performance internal APIs: Millisecond timestamps `1711800000000` are acceptable with documented justification
 
-### 禁止
+### Prohibited
 
-- ❌ 存储本地时间（如 `2026-03-30 12:00:00`）
-- ❌ API 返回不含时区偏移的时间（如无偏移的 `2026-03-30T12:00:00`）
-- ❌ 混用时间格式
+- ❌ Storing local time (e.g., `2026-03-30 12:00:00`)
+- ❌ Returning times without timezone offset in API responses (e.g., `2026-03-30T12:00:00` without offset)
+- ❌ Mixing time formats
 
-### 一句话规范
+### One-Liner
 
-**API：ISO 8601 Z（UTC）** | **PostgreSQL：timestamptz + SET TIMEZONE 'UTC'** | **MySQL：DATETIME(3) + 应用保证 UTC**
+**API: ISO 8601 Z (UTC)** | **PostgreSQL: timestamptz + SET TIMEZONE 'UTC'** | **MySQL: DATETIME(3) + application-enforced UTC**
 
-> 统一使用 UTC。PostgreSQL 使用 `TIMESTAMP WITH TIME ZONE` 并设置会话时区为 UTC；API 层统一使用 ISO 8601 `Z` 格式。
+> Always use UTC. PostgreSQL uses `TIMESTAMP WITH TIME ZONE` with the session timezone set to UTC; the API layer uniformly uses ISO 8601 `Z` format.
 
-## 十六、上线 Checklist
+## 16. Pre-Launch Checklist
 
-- [ ] 标准HTTP方法
-- [ ] 响应结构统一
-- [ ] 字段 camelCase
-- [ ] 分页规范
-- [ ] 数据库 snake_case
-- [ ] 时间格式符合规范（ISO 8601 + UTC）
+- [ ] Standard HTTP methods
+- [ ] Unified response structure
+- [ ] camelCase field names
+- [ ] Pagination convention
+- [ ] snake_case database naming
+- [ ] Time format compliance (ISO 8601 + UTC)
 - [ ] traceId
-- [ ] 日志与监控
-- [ ] 参数校验完整
+- [ ] Logging and monitoring
+- [ ] Complete input validation
 
-## 十七、总结
+## 17. Summary
 
-**统一结构 + 正确语义 + 稳定分页 + 可观测性 = 生产级 API**
-本规范为组织级强制标准。所有新服务必须遵循，存量系统逐步迁移。
+**Unified structure + correct semantics + stable pagination + observability = production-grade API**
+This convention is an organization-wide mandatory standard. All new services must comply; existing systems migrate incrementally.

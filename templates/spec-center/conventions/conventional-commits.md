@@ -1,10 +1,10 @@
 # Conventional Commits
 
-> Git 提交信息规范。适用于所有模块。
+> Git commit message convention. Applies to all modules.
 
-## 格式
+## Format
 
-严格遵循 [Conventional Commits](https://www.conventionalcommits.org/)：
+Strictly follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 <type>(<scope>): <description>
@@ -14,24 +14,24 @@
 [optional footer(s)]
 ```
 
-## 类型（Types）
+## Types
 
-| Type | 用途 |
-|---|---|
-| `feat` | 新功能 |
-| `fix` | Bug 修复 |
-| `docs` | 文档变更 |
-| `spec` | 规格说明变更（spec-only changes） |
-| `style` | 格式调整（不影响代码逻辑） |
-| `refactor` | 重构（既非新功能也非修复） |
-| `perf` | 性能优化 |
-| `test` | 测试相关 |
-| `build` | 构建系统或外部依赖变更 |
-| `ci` | CI 配置变更 |
-| `chore` | 杂项（不修改 src 或 test） |
-| `revert` | 回滚提交 |
+| Type | Purpose |
+|------|---------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation changes |
+| `spec` | Specification-only changes |
+| `style` | Formatting changes (no logic changes) |
+| `refactor` | Code refactoring (neither a feature nor a fix) |
+| `perf` | Performance improvement |
+| `test` | Adding or updating tests |
+| `build` | Build system or external dependency changes |
+| `ci` | CI configuration changes |
+| `chore` | Maintenance tasks (no src or test changes) |
+| `revert` | Revert a previous commit |
 
-## 示例
+## Examples
 
 ```
 spec(api): add endpoint specification

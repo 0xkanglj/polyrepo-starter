@@ -60,8 +60,8 @@ When working on a feature:
 3. **Module-specific spec** -> Write/update in the module's `docs/` directory.
 4. **Cross-reference** - Module-specific specs must reference the shared specs they depend on. Use relative links like `[API Spec](../{{PROJECT}}-spec-center/conventions/xxx.md)`.
 5. **docs/ sub-directories** - Each module's `docs/` MUST contain two sub-directories:
-   - `docs/specs/` — 规格说明文档（数据模型、业务规则、接口定义、约束条件等，偏"是什么"）
-   - `docs/plans/` — 实施方案文档（技术方案、架构设计、迁移计划、开发计划等，偏"怎么做"）
+   - `docs/specs/` — Specification documents (data models, business rules, interface definitions, constraints — the "what")
+   - `docs/plans/` — Implementation plans (technical designs, architecture decisions, migration strategies, development roadmaps — the "how")
 
 ### Implementation Plans (Cross-Module Features)
 
@@ -136,11 +136,11 @@ All convention documents live in `conventions/` and define cross-cutting rules t
 
 | Document | Scope | Description |
 |---|---|---|
-| [http-constitution.md](conventions/http-constitution.md) | All HTTP services / APIs | HTTP 全局设计规范：方法选择、状态码、响应结构、分页、排序、时间格式、版本管理等 |
-| [go-validation.md](conventions/go-validation.md) | All Go microservices | Go 项目输入校验规范：校验库选型、字段规则、错误格式、自定义校验器 |
-| [go-project.md](conventions/go-project.md) | All Go backend services | Go 项目结构约定：目录布局、分层模式、命名规范 |
-| [engineering-guidelines.md](conventions/engineering-guidelines.md) | All modules & dev tools | LLM/agent 编码行为规范：编码前思考、代码风格、重构原则、安全约束 |
-| [conventional-commits.md](conventions/conventional-commits.md) | All modules | Git 提交信息规范：类型、范围、格式 |
+| [http-constitution.md](conventions/http-constitution.md) | All HTTP services / APIs | HTTP design standard: method selection, status codes, response structure, pagination, sorting, time format, versioning |
+| [go-validation.md](conventions/go-validation.md) | All Go microservices | Go input validation convention: library selection, field rules, error format, custom validators |
+| [go-project.md](conventions/go-project.md) | All Go backend services | Go project structure convention: directory layout, layered architecture, naming conventions |
+| [engineering-guidelines.md](conventions/engineering-guidelines.md) | All modules & dev tools | LLM/agent coding behavior guidelines: think-before-code, code style, refactoring principles, safety constraints |
+| [conventional-commits.md](conventions/conventional-commits.md) | All modules | Git commit message convention: types, scopes, format |
 
 ### AGENTS.md Hierarchy
 
@@ -170,11 +170,11 @@ workspace/
 ├── {{PROJECT}}-spec-center/      # SSOT - shared specs and contracts
 │   ├── AGENTS.md                 # This file - global project rules
 │   ├── conventions/              # Shared conventions
-│   │   ├── conventional-commits.md  # Git 提交信息规范
+│   │   ├── conventional-commits.md  # Git commit message convention
 │   │   ├── engineering-guidelines.md  # LLM/agent coding behavior guidelines
-│   │   ├── http-constitution.md  # HTTP/API 全局设计规范 (v1.0)
-│   │   ├── go-validation.md      # Go project Input validation 校验规范 (v1.0)
-│   │   └── go-project.md         # Go project structure (v1.0)
+│   │   ├── http-constitution.md  # HTTP/API design standard (v1.0)
+│   │   ├── go-validation.md      # Go input validation convention (v1.0)
+│   │   └── go-project.md         # Go project structure convention (v1.0)
 │   ├── api/                      # API specifications (OpenAPI / endpoint specs)
 │   │   └── .gitkeep
 │   ├── docs/                     # Cross-module domain specifications
