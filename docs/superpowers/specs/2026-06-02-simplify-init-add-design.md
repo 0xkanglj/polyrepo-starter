@@ -114,7 +114,7 @@ async function addCommand(options) {
   // 1. 检测 workspace（不变）
   // 2. 扫描已有模块
 
-  const sessionAdded = [];
+  const addedModules = []; // 完整模块对象数组
 
   while (true) {
     const allModules = getAvailableTemplateNames()
@@ -135,12 +135,12 @@ async function addCommand(options) {
     const mod = await promptModuleName(
       selected,
       existingModules,
-      sessionAdded,
+      addedModules.map(m => m.name),
     );
 
     // 创建模块
     createModule(mod.templateRef, modDir, projectName, mod);
-    sessionAdded.push(mod.name);
+    addedModules.push(mod);
     existingModules.push(mod.name);
 
     // 继续添加？
@@ -152,7 +152,7 @@ async function addCommand(options) {
   }
 
   // merge AGENTS.md（批量处理本次添加的所有模块）
-  if (sessionAdded.length > 0) {
+  if (addedModules.length > 0) {
     mergeAgentsMd(workspaceDir, projectName, addedModules);
   }
 
