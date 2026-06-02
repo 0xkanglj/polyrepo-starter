@@ -1,16 +1,14 @@
 import path from 'path';
 import fs from 'fs';
 import {
-  expandHome,
-  validateProjectName,
   extractProjectName,
   SPEC_CENTER_SUFFIX,
   SPEC_CENTER_NAME,
 } from '../utils/path.js';
-import { promptAddModules, parseModuleList, promptCustomModule } from '../utils/prompt.js';
+import { parseModuleList, promptAddOneModule, promptModuleName } from '../utils/prompt.js';
 import { createModule } from '../core/scaffold.js';
 import { mergeAgentsMd } from '../core/agents-sync.js';
-import { getAvailableTemplateNames, validateTemplate } from '../core/templates.js';
+import { getAvailableTemplateNames } from '../core/templates.js';
 import { confirm } from '@inquirer/prompts';
 import {
   info,
@@ -62,31 +60,6 @@ export function scanExistingModules(workspaceDir, projectName) {
 }
 
 /**
- * 解析 -c 参数的自定义模块
- */
-function parseCustomModules(customArgs, allTemplateNames) {
-  const customs = Array.isArray(customArgs) ? customArgs : [customArgs];
-  const modules = [];
-  for (const c of customs) {
-    const [name, ref] = c.split(':');
-    if (!name || !ref) {
-      throw new CommandError(`Invalid custom module format: "${c}". Use name:ref (e.g. crawler:server)`);
-    }
-    const nameValidation = validateProjectName(name);
-    if (nameValidation !== true) {
-      throw new CommandError(`Invalid custom module name "${name}": ${nameValidation}`);
-    }
-    try {
-      validateTemplate(ref);
-    } catch {
-      throw new CommandError(`Reference template not found: "${ref}". Available: ${allTemplateNames.join(', ')}`);
-    }
-    modules.push({ name, templateRef: ref, isCustom: true });
-  }
-  return modules;
-}
-
-/**
  * add 子命令：追加模块到已有 workspace
  * @param {object} options - Commander 解析的选项
  */
@@ -110,71 +83,86 @@ export async function addCommand(options) {
     info(`Detected project:   ${projectName}`);
     info(`Existing modules:   ${existingModules.join(', ')}`);
 
-    const allTemplateNames = getAvailableTemplateNames();
-    const available = allTemplateNames.filter(
-      (m) => !existingModules.includes(m)
+    // Check if templates are available
+    const templates = getAvailableTemplateNames().filter(
+      (t) => t !== SPEC_CENTER_NAME
     );
+    if (templates.length === 0) {
+      info('No modules available to add.');
+      return;
+    }
 
-    // 2. 收集要添加的模块
-    let toAdd;
+    // 2. --modules: 批量模式，跳过交互循环
     if (options.modules) {
-      toAdd = parseModuleList(options.modules);
-    } else if (options.custom) {
-      toAdd = [];
-    } else {
-      if (available.length === 0) {
-        info('All standard modules are already installed.');
-        const addCustom = await confirm({ message: 'Add a custom module?', default: true });
-        if (addCustom) {
-          const customs = await promptCustomModule();
-          toAdd = customs;
-        } else {
-          toAdd = [];
+      const toAdd = parseModuleList(options.modules);
+      const filtered = toAdd.filter((m) => {
+        if (existingModules.includes(m.name)) {
+          warn(`Module "${m.name}" already exists. Skipping.`);
+          return false;
         }
-      } else {
-        toAdd = await promptAddModules(available);
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        info('All specified modules already exist. Nothing to add.');
+        return;
       }
-    }
 
-    if (options.custom) {
-      toAdd.push(...parseCustomModules(options.custom, allTemplateNames));
-    }
-
-    // 3. 跳过已存在的模块
-    const filtered = toAdd.filter((m) => {
-      if (existingModules.includes(m.name)) {
-        warn(`Module "${m.name}" already exists. Skipping.`);
-        return false;
+      if (options.dryRun) {
+        for (const mod of filtered) {
+          console.log(`  Would create: ${moduleLabel(projectName, mod)}/`);
+        }
+        return;
       }
-      return true;
-    });
 
-    if (filtered.length === 0) {
-      info('All specified modules already exist. Nothing to add.');
-      return;
-    }
-
-    // 4. Dry run
-    if (options.dryRun) {
       for (const mod of filtered) {
-        console.log(`  Would create: ${moduleLabel(projectName, mod)}/`);
+        const modDir = path.join(workspaceDir, `${projectName}-${mod.name}`);
+        createModule(mod.templateRef, modDir, projectName, mod);
       }
+
+      if (filtered.length > 0) mergeAgentsMd(workspaceDir, projectName, filtered);
+      printSummary(workspaceDir, projectName, filtered, 'added');
       return;
     }
 
-    // 5. 创建新模块
-    for (const mod of filtered) {
-      const modDir = path.join(workspaceDir, `${projectName}-${mod.name}`);
-      createModule(mod.templateRef, modDir, projectName, mod);
+    // 3. Interactive single-select loop
+    const addedModules = [];
+
+    while (true) {
+      const { templateName } = await promptAddOneModule(existingModules);
+
+      const mod = await promptModuleName(
+        templateName,
+        existingModules,
+        addedModules.map((m) => m.name),
+      );
+
+      if (options.dryRun) {
+        console.log(`  Would create: ${moduleLabel(projectName, mod)}/`);
+      } else {
+        const modDir = path.join(workspaceDir, `${projectName}-${mod.name}`);
+        createModule(mod.templateRef, modDir, projectName, mod);
+      }
+
+      addedModules.push(mod);
+      existingModules.push(mod.name);
+
+      const more = await confirm({
+        message: '继续添加下一个模块？',
+        default: false,
+      });
+      if (!more) break;
     }
 
-    // 6. 增量 merge AGENTS.md
-    mergeAgentsMd(workspaceDir, projectName, filtered);
+    if (!options.dryRun && addedModules.length > 0) {
+      mergeAgentsMd(workspaceDir, projectName, addedModules);
+    }
 
-    printSummary(workspaceDir, projectName, filtered, 'added');
+    printSummary(workspaceDir, projectName, addedModules, 'added');
   } catch (err) {
     if (err.name === 'ExitPromptError') {
       info('Aborted.');
+      // TODO: list already-created modules — not rolling back
       return;
     }
     if (err instanceof CommandError) throw err;
