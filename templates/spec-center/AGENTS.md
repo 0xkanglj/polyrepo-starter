@@ -155,6 +155,8 @@ When a spec document is **added or updated**, the corresponding AGENTS.md **MUST
 
 **Rule**: No spec document should exist without being referenced in an AGENTS.md.
 
+**Exception**: Requirement/feature spec documents under `docs/specs/` (in any module or in spec-center) do **not** need to be referenced in AGENTS.md. These specs are transient and numerous; the AGENTS.md index requirement applies to governing specs (API contracts, error codes, conventions, event schemas) only.
+
 **How**:
 
 1. **`{{PROJECT}}-spec-center/AGENTS.md`** — Maintain the "Spec Center as SSOT" bullet list and Repository Structure tree with actual filenames and relative links. Every file under `{{PROJECT}}-spec-center/` must appear in at least one of these two places.
