@@ -3,25 +3,88 @@ ifneq (,$(wildcard .env))
     export
 endif
 
-.PHONY: help install dev build test lint clean
+# ==============================================================================
+# {{PROJECT}}-mobile - Makefile
+# ==============================================================================
 
+# --- Variables ----------------------------------------------------------------
+
+APP_NAME        := {{PROJECT}}-mobile
+
+VERSION         ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT          ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+BUILD_TIME      := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# Colors
+CYAN  := \033[36m
+RESET := \033[0m
+BOLD  := \033[1m
+
+.DEFAULT_GOAL := help
+
+# ==============================================================================
+# HELP
+# ==============================================================================
+
+.PHONY: help
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(BOLD){{PROJECT}}-mobile$(RESET)"
+	@echo ""
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*?##/ { printf "  $(CYAN)%-20s$(RESET) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@echo ""
 
-install: ## Install dependencies
-	@echo "TODO: define install command"
+# ==============================================================================
+# BUILD
+# ==============================================================================
 
-dev: ## Start dev server
-	@echo "TODO: define dev command"
-
+.PHONY: build
 build: ## Build for production
 	@echo "TODO: define build command"
 
+# ==============================================================================
+# DEV
+# ==============================================================================
+
+.PHONY: dev
+dev: ## Start dev server
+	@echo "TODO: define dev command"
+
+# ==============================================================================
+# DEPENDENCY MANAGEMENT
+# ==============================================================================
+
+.PHONY: install
+install: ## Install dependencies
+	@echo "TODO: define install command"
+
+# ==============================================================================
+# TESTING
+# ==============================================================================
+
+.PHONY: test
 test: ## Run tests
 	@echo "TODO: define test command"
 
+# ==============================================================================
+# CODE QUALITY
+# ==============================================================================
+
+.PHONY: lint
 lint: ## Run linter
 	@echo "TODO: define lint command"
 
-clean: ## Clean build artifacts
+.PHONY: fmt
+fmt: ## Format code
+	@echo "TODO: define fmt command"
+
+.PHONY: check
+check: fmt lint test ## Run all quality checks (fmt + lint + test)
+
+# ==============================================================================
+# HOUSEKEEPING
+# ==============================================================================
+
+.PHONY: clean
+clean: ## Remove build artifacts and generated files
 	@echo "TODO: define clean command"
