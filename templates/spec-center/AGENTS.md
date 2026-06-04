@@ -86,7 +86,25 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 
 **When a single cross-module plan is acceptable (rare):** Only for small, atomic changes that must land in one PR and touch ≤2 modules with no meaningful dependency boundary (e.g. a one-field DTO addition + one UI column). Prefer split plans when in doubt.
 
+**Splitting large plans into sub-plans:** When a single module's plan becomes large (e.g. 8+ steps, multiple phases, or spanning several independent work streams), split it into focused sub-plans to keep each one reviewable and executable in isolation:
+
+1. **Create a parent plan** — `docs/plans/YYYY-MM-DD-feature.md` containing an overview, scope, and links to all sub-plans.
+2. **Create sub-plans** — `docs/plans/YYYY-MM-DD-feature--<slug>.md` where `<slug>` describes the sub-scope (e.g. `--schema`, `--api`, `--ui-list`, `--ui-detail`).
+3. **Each sub-plan MUST** — state its own goal, scope, dependencies (on other sub-plans or external modules), steps, and acceptance criteria.
+4. **Order of execution** — The parent plan defines the recommended execution order; sub-plans declare `Depends on: <sub-plan-slug>` when sequencing matters.
+5. **Sub-plans are independently reviewable** — Each sub-plan should be small enough to review, implement, and merge as a self-contained unit.
+
 **Example:**
+
+```
+{{PROJECT}}-web/docs/plans/2026-06-01-user-management.md            ← parent overview
+{{PROJECT}}-web/docs/plans/2026-06-01-user-management--schema.md     ← data layer
+{{PROJECT}}-web/docs/plans/2026-06-01-user-management--api-client.md ← API integration
+{{PROJECT}}-web/docs/plans/2026-06-01-user-management--user-list.md  ← list page UI
+{{PROJECT}}-web/docs/plans/2026-06-01-user-management--user-detail.md ← detail page UI; Depends on user-list
+```
+
+**Example (single module, no split needed):**
 
 ```
 {{PROJECT}}-spec-center/docs/specs/2026-06-01-feature-design.md   ← SSOT spec
