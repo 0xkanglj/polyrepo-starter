@@ -196,44 +196,33 @@ workspace/
 │   │   ├── go-validation.md      # Go input validation convention (v1.0)
 │   │   └── go-project.md         # Go project structure convention (v1.0)
 │   ├── api/                      # API specifications (OpenAPI / endpoint specs)
-│   │   └── .gitkeep
 │   ├── docs/                     # Cross-module domain specifications
 │   │   └── specs/                # Shared specs affecting 2+ modules
-│   │       └── .gitkeep
 │   ├── errors/                   # Error codes and formats
 │   │   └── error-codes.md        # Business error code registry
 │   └── events/                   # Inter-module event definitions
-│       └── .gitkeep
 <!-- BEGIN MODULE:server -->├── {{PROJECT}}-server/           # Server application
 │   ├── AGENTS.md                 # Server-specific conventions
 │   └── docs/
 │       ├── specs/                # Server-specific specifications
-│       │   └── .gitkeep
 │       └── plans/                # Server-specific implementation plans
-│           └── .gitkeep
 <!-- END MODULE:server -->
 <!-- BEGIN MODULE:web -->├── {{PROJECT}}-web/              # Web application
 │   ├── AGENTS.md                 # Web-specific conventions
 │   └── docs/
 │       ├── specs/                # Web-specific specifications
-│       │   └── .gitkeep
 │       └── plans/                # Web-specific implementation plans
-│           └── .gitkeep
 <!-- END MODULE:web -->
 <!-- BEGIN MODULE:mobile -->├── {{PROJECT}}-mobile/           # Mobile application
 │   ├── AGENTS.md                 # Mobile-specific conventions
 │   └── docs/
 │       ├── specs/                # Mobile-specific specifications
-│       │   └── .gitkeep
 │       └── plans/                # Mobile-specific implementation plans
-│           └── .gitkeep
 <!-- END MODULE:mobile -->
 <!-- BEGIN MODULE:admin -->└── {{PROJECT}}-admin/            # Admin application
     ├── AGENTS.md                 # Admin-specific conventions
     └── docs/
         ├── specs/                # Admin-specific specifications
-        │   └── .gitkeep
         └── plans/                # Admin-specific implementation plans
-            └── .gitkeep
 <!-- END MODULE:admin -->
 ```

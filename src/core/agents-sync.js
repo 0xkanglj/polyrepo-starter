@@ -205,8 +205,6 @@ function buildModuleTreeEntry(projectName, moduleName, role) {
     `    ├── AGENTS.md                 # ${cap}-specific conventions`,
     '    └── docs/',
     `        ├── specs/                # ${cap}-specific specifications`,
-    '        │   └── .gitkeep',
     `        └── plans/                # ${cap}-specific implementation plans`,
-    '            └── .gitkeep',
   ].join('\n');
 }
