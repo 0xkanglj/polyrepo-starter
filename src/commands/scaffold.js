@@ -30,6 +30,7 @@ export async function scaffoldCommand(options) {
 
     // 1. Detect mode
     const { mode, ctx } = detectMode(cwd, options);
+    ctx.existingModules = ctx.existingModules || [];
 
     let projectName;
     let workspaceDir;
