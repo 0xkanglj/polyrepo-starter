@@ -1,8 +1,3 @@
-ifneq (,$(wildcard .env))
-    include .env
-    export
-endif
-
 # ==============================================================================
 # {{PROJECT}}-server - Makefile
 # ==============================================================================
@@ -122,11 +117,15 @@ lint: ## Run linter
 fmt: ## Format code
 	@echo "TODO: define fmt command"
 
+.PHONY: govulncheck
+govulncheck: ## Scan for known vulnerabilities in dependencies
+	@echo "TODO: define govulncheck command"
+
 .PHONY: check
-check: fmt lint test ## Run all quality checks (fmt + lint + test)
+check: fmt lint govulncheck test ## Run all quality checks (fmt + lint + govulncheck + test)
 
 .PHONY: release-check
-release-check: lint test ## Pre-release checks (no fmt)
+release-check: lint govulncheck test ## Pre-release checks (lint + govulncheck + test)
 
 # ==============================================================================
 # DOCKER
