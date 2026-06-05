@@ -46,7 +46,7 @@ detectMode(cwd, options)
     └─ mode === 'add'
         workspaceDir, projectName from findSpecCenter()
         existingModules from scanExistingModules()
-        --name / --dir ignored (info log)
+        --dir ignored with info log (if provided)
         spec-center already exists
 
     │ (shared flow)
@@ -132,6 +132,7 @@ interface Module {
   isCustom: boolean;    // name !== templateRef
   removable: boolean;   // false for spec-center, true for others
 }
+                        // Computed during module list assembly, not by parseModuleList/promptModuleName
 ```
 
 ## Step Details
@@ -148,8 +149,9 @@ else → mode = 'init' (no workspace found, create new)
 
 ```
 if options.name → validate, return
-else → interactive promptName()
 ```
+
+Note: `--name` also forces `mode === 'init'` in `detectMode` (explicit intent wins over workspace detection). When `--name` is provided, `resolveName` returns it directly without interactive prompt.
 
 ### resolveDir(cwd, name, options)
 
@@ -161,7 +163,7 @@ else → interactive promptDir(default: cwd/name)
 ### moduleLoop(ctx, options)
 
 ```
-if options.modules → parseModuleList(options.modules, takenNames) → return
+if options.modules → parseModuleList(options.modules, takenNames: []) → return
 
 while true:
   templateName = selectTemplate(exclude: spec-center)
@@ -192,10 +194,9 @@ Menu options via inquirer select:
 - **Remove module** → select a removable row → remove from list
 - **Add another module** → go back to moduleLoop, append results
 - **Confirm and proceed** → exit review, start creation
-
-Loop until user selects Confirm.
-
 ### parseModuleList enhancement
+
+Signature: `parseModuleList(moduleStr: string, takenNames: string[] = []): Module[]`
 
 ```
 input: "server,web,api=server"
@@ -238,12 +239,11 @@ During moduleLoop and reviewTable edit:
 ## Non-interactive Mode
 
 When `-m` is provided:
+- Init mode still requires `--name` (or falls back to interactive prompt) — provide `-n` for fully non-interactive operation
 - Skip moduleLoop entirely
 - Skip reviewTable
 - Print a summary of what will be created
 - Proceed directly to creation (unless `--dry-run`)
-
-Init mode still needs `--name` (or interactive prompt) and `--dir` (or default).
 
 spec-center is always auto-included in init mode regardless of `-m` content. If `-m` contains `spec-center` explicitly, it is deduplicated (no error, just skipped).
 
@@ -251,8 +251,9 @@ In add mode, if `-m` contains `spec-center`, it is skipped with a warning since 
 
 ## Error Handling
 
-- No workspace found and no `--name` → interactive prompts for name/dir (init flow)
-- `--name` provided but workspace detected → warn and proceed with init (explicit intent wins)
+- No workspace found and no `--name` → interactive prompts for name/dir (init flow; equivalent to `scaffold` with no flags)
+- `--name` provided but workspace detected → warn `"Existing workspace at <path> detected; --name provided, creating new workspace in <target>"` and proceed with init (explicit intent wins)
+- `--dir` provided without `--name` but workspace detected → warn `"--dir ignored; using detected workspace at <path>"` and proceed with add mode (dir flag only takes effect in init mode)
 - Module name conflict → warn and skip (non-interactive) or re-prompt (interactive)
 - Template not found → error with message
 - ExitPromptError (Ctrl+C) → print "Aborted." and exit cleanly
@@ -272,4 +273,13 @@ New tests to add:
 - `tests/steps/review-table.test.js`
 - `tests/commands/scaffold.test.js` (integration)
 
-Tests can remove `--templates-dir` flag usage since it's no longer supported.
+### Templates-dir removal in tests
+
+`resolveTemplatesDir()` resolves from `__dirname` (derived from `import.meta.url` — the actual file location on disk), not from `process.cwd()`. This means templates are always resolved relative to the source tree regardless of where the CLI is invoked, making `--templates-dir` unnecessary even for tests running from temp directories.
+
+Tests can safely drop:
+- `--templates-dir "${TEMPLATES_DIR}"` from CLI invocations in `init.test.js`, `add.test.js`
+- `setGlobalTemplatesDir(TEMPLATES_DIR)` / `resetGlobalTemplatesDir()` calls in `scaffold.test.js`, `templates.test.js`
+- `TEMPLATES_DIR` constants importing `resolve(__dirname, ../../templates)`
+
+Integration tests (running CLI via `execSync`) work from any CWD without template path overrides. Unit tests that import `path.js` directly also resolve correctly since `__dirname` always points to the actual source location.
