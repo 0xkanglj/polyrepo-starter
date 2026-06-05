@@ -41,8 +41,8 @@ export function parseModuleList(moduleStr, takenNames = []) {
     const eqIdx = entry.indexOf('=');
     let name, templateName;
     if (eqIdx >= 0) {
-      name = entry.slice(0, eqIdx);
-      templateName = entry.slice(eqIdx + 1);
+      name = entry.slice(0, eqIdx).trim();
+      templateName = entry.slice(eqIdx + 1).trim();
     } else {
       name = entry;
       templateName = entry;

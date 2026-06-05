@@ -1,20 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { getAvailableTemplateNames, getModuleRole, validateTemplate } from '../../src/core/templates.js';
-import { setGlobalTemplatesDir, resetGlobalTemplatesDir } from '../../src/utils/path.js';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 describe('templates', () => {
-  beforeEach(() => {
-    setGlobalTemplatesDir(TEMPLATES_DIR);
-  });
-
-  afterEach(() => {
-    resetGlobalTemplatesDir();
-  });
 
   describe('getAvailableTemplateNames', () => {
     it('returns all template names except root', () => {
