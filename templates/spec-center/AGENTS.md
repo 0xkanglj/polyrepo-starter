@@ -93,6 +93,8 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 3. **Each sub-plan MUST** — state its own goal, scope, dependencies (on other sub-plans or external modules), steps, and acceptance criteria.
 4. **Order of execution** — The parent plan defines the recommended execution order; sub-plans declare `Depends on: <sub-plan-slug>` when sequencing matters.
 5. **Sub-plans are independently reviewable** — Each sub-plan should be small enough to review, implement, and merge as a self-contained unit.
+6. **Don't over-split** — Each sub-plan MUST contain at least 1,200 lines of implementation scope. If a split would produce sub-plans smaller than this threshold, keep the work in a single plan instead.
+7. **Cap the number of sub-plans** — No more than 5 sub-plans per parent plan. If the scope requires more than 5, re-evaluate the boundaries and consolidate related sub-scopes.
 
 **Example:**
 
