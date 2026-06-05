@@ -47,7 +47,7 @@ rm -f "$CLONE_ERR"
 cd "$TEMP_DIR"
 
 NPM_ERR=$(mktemp)
-if ! npm install --production --silent 2>"$NPM_ERR"; then
+if ! npm install --omit=dev --silent 2>"$NPM_ERR"; then
   echo "Error: npm install failed."
   cat "$NPM_ERR" >&2
   rm -f "$NPM_ERR"
@@ -59,42 +59,18 @@ rm -f "$NPM_ERR"
 cd "$ORIGINAL_DIR"
 
 # ---------------------------------------------------------------------------
-# Prompt helper: read from /dev/tty when stdin is a pipe
+# Build CLI flags from environment variables
 # ---------------------------------------------------------------------------
-prompt_value() {
-  local prompt="$1"
-  local var_name="$2"
-  if [ -t 0 ]; then
-    # stdin is a terminal — let inquirer handle it
-    return
-  fi
-  # stdin is a pipe — read from /dev/tty
-  if [ ! -e /dev/tty ]; then
-    echo "Error: Cannot read input (no /dev/tty). Use: PROJECT=name curl ... | bash"
-    exit 1
-  fi
-  printf "%s" "$prompt"
-  read -r "$var_name" < /dev/tty || true
-}
-
-# ---------------------------------------------------------------------------
-# Build CLI flags for non-interactive stdin
-# ---------------------------------------------------------------------------
-build_init_flags() {
-  INIT_FLAGS=()
+build_cli_flags() {
+  CLI_FLAGS=()
   if [ -n "${PROJECT_NAME:-}" ]; then
-    INIT_FLAGS+=(--name "$PROJECT_NAME")
-  elif ! [ -t 0 ]; then
-    prompt_value "? Project name: " PROJECT_NAME
-    if [ -n "${PROJECT_NAME:-}" ]; then
-      INIT_FLAGS+=(--name "$PROJECT_NAME")
-    fi
+    CLI_FLAGS+=(--name "$PROJECT_NAME")
   fi
   if [ -n "${WORKSPACE_DIR:-}" ]; then
-    INIT_FLAGS+=(--dir "$WORKSPACE_DIR")
+    CLI_FLAGS+=(--dir "$WORKSPACE_DIR")
   fi
   if [ -n "${MODULES:-}" ]; then
-    INIT_FLAGS+=(--modules "$MODULES")
+    CLI_FLAGS+=(--modules "$MODULES")
   fi
 }
 
@@ -110,13 +86,8 @@ run_cli() {
 }
 
 # ---------------------------------------------------------------------------
-# Auto-detect mode
+# Run the unified scaffold command
+# The CLI auto-detects init vs add mode from the current directory context.
 # ---------------------------------------------------------------------------
-if find "$ORIGINAL_DIR" -maxdepth 1 -type d -name '*-spec-center' 2>/dev/null | grep -q .; then
-  echo "Detected existing workspace. Running 'add' command..."
-  run_cli "$TEMP_DIR/src/cli.js" add --templates-dir "$TEMP_DIR/templates" "$@"
-else
-  echo "Creating new workspace..."
-  build_init_flags
-  run_cli "$TEMP_DIR/src/cli.js" init --templates-dir "$TEMP_DIR/templates" "${INIT_FLAGS[@]+"${INIT_FLAGS[@]}"}" "$@"
-fi
+build_cli_flags
+run_cli "$TEMP_DIR/src/cli.js" "${CLI_FLAGS[@]+"${CLI_FLAGS[@]}"}" "$@"
