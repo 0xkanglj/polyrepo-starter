@@ -6,22 +6,19 @@ import { SPEC_CENTER_NAME } from '../utils/path.js';
 import { validateProjectName } from '../utils/path.js';
 import { warn } from '../utils/logger.js';
 
-function _displayTable(modules, ctx) {
+function _displayTable(modules) {
   console.log('');
   console.log(chalk.bold('  Modules to create:'));
-  console.log('  ┌─────┬──────────────────────┬──────────────────────┬──────────┐');
-  console.log('  │ #   │ Module               │ Template             │ Status   │');
-  console.log('  ├─────┼──────────────────────┼──────────────────────┼──────────┤');
+  console.log('  ┌─────┬──────────────────────┬──────────────────────┐');
+  console.log('  │ #   │ Module               │ Template             │');
+  console.log('  ├─────┼──────────────────────┼──────────────────────┤');
   modules.forEach((mod, i) => {
     const idx = String(i + 1).padEnd(3);
     const name = mod.name.padEnd(20);
     const template = (mod.isCustom ? mod.templateRef : '—').padEnd(20);
-    const status = (ctx.existingModules && ctx.existingModules.includes(mod.name))
-      ? chalk.yellow('existing'.padEnd(8))
-      : chalk.green('new'.padEnd(8));
-    console.log(`  │ ${idx} │ ${name} │ ${template} │ ${status} │`);
+    console.log(`  │ ${idx} │ ${name} │ ${template} │`);
   });
-  console.log('  └─────┴──────────────────────┴──────────────────────┴──────────┘');
+  console.log('  └─────┴──────────────────────┴──────────────────────┘');
   console.log('');
 }
 
@@ -34,7 +31,7 @@ export async function reviewTable(ctx, options, modules) {
   let currentModules = [...modules];
 
   while (true) {
-    _displayTable(currentModules, ctx);
+    _displayTable(currentModules);
 
     const action = await select({
       message: 'What would you like to do?',
@@ -43,11 +40,16 @@ export async function reviewTable(ctx, options, modules) {
         { name: '📝 Edit module name', value: 'edit' },
         { name: '🗑️  Remove a module', value: 'remove' },
         { name: '➕ Add another module', value: 'add' },
+        { name: '❌ Cancel and exit', value: 'exit' },
       ],
     });
 
     if (action === 'confirm') {
       return currentModules;
+    }
+
+    if (action === 'exit') {
+      return null;
     }
 
     if (action === 'remove') {

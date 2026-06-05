@@ -25,7 +25,7 @@ export async function moduleLoop(ctx, options, initialModules = []) {
     modules.push(mod);
     takenNames.push(mod.name);
     sessionAddedNames.push(mod.name);
-    const more = await confirm({ message: 'Add another module?', default: false });
+    const more = await confirm({ message: 'Add another module?', default: true });
     if (!more) break;
   }
   return modules;

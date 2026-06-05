@@ -76,6 +76,10 @@ export async function scaffoldCommand(options) {
 
     // 5. Review table
     modules = await reviewTable(ctx, options, modules);
+    if (modules === null) {
+      info('Cancelled.');
+      return;
+    }
 
     // 6. Dry run
     if (options.dryRun) {
