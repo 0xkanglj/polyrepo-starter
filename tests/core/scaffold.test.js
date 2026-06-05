@@ -1,24 +1,20 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { copyAndReplace, gitInit, mkdirIfNeeded } from '../../src/core/scaffold.js';
-import { setGlobalTemplatesDir, resetGlobalTemplatesDir } from '../../src/utils/path.js';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'fs';
 import tmp from 'tmp-promise';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 describe('scaffold', () => {
   let tempDir;
 
   beforeEach(async () => {
     tempDir = await tmp.dir({ unsafeCleanup: true });
-    setGlobalTemplatesDir(TEMPLATES_DIR);
   });
 
   afterEach(async () => {
-    resetGlobalTemplatesDir();
     await tempDir.cleanup();
   });
 

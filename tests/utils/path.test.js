@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { expandHome, validateProjectName, extractProjectName, resetGlobalTemplatesDir } from '../../src/utils/path.js';
+import { expandHome, validateProjectName, extractProjectName } from '../../src/utils/path.js';
 import { homedir } from 'os';
 import { resolve } from 'path';
 

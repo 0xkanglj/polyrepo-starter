@@ -4,8 +4,6 @@ import { input } from '@inquirer/prompts';
 
 vi.mock('@inquirer/prompts', () => ({
   input: vi.fn(),
-  checkbox: vi.fn(),
-  confirm: vi.fn(),
   select: vi.fn(),
 }));
 
@@ -16,6 +14,22 @@ describe('parseModuleList', () => {
       { name: 'server', templateRef: 'server', isCustom: false },
       { name: 'web', templateRef: 'web', isCustom: false },
       { name: 'mobile', templateRef: 'mobile', isCustom: false },
+    ]);
+  });
+
+  it('parses name=template syntax', () => {
+    const result = parseModuleList('api=server');
+    expect(result).toEqual([
+      { name: 'api', templateRef: 'server', isCustom: true },
+    ]);
+  });
+
+  it('parses mixed plain and name=template', () => {
+    const result = parseModuleList('server,api=server,web');
+    expect(result).toEqual([
+      { name: 'server', templateRef: 'server', isCustom: false },
+      { name: 'api', templateRef: 'server', isCustom: true },
+      { name: 'web', templateRef: 'web', isCustom: false },
     ]);
   });
 
@@ -33,6 +47,40 @@ describe('parseModuleList', () => {
       { name: 'server', templateRef: 'server', isCustom: false },
       { name: 'web', templateRef: 'web', isCustom: false },
     ]);
+  });
+
+  it('trims whitespace in name=template', () => {
+    const result = parseModuleList(' api = server ');
+    expect(result).toEqual([
+      { name: 'api', templateRef: 'server', isCustom: true },
+    ]);
+  });
+
+  it('skips duplicate names', () => {
+    const result = parseModuleList('server,server');
+    // First server is valid, second is a duplicate in takenNames
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('server');
+  });
+
+  it('skips names in takenNames', () => {
+    const result = parseModuleList('server', ['server']);
+    expect(result).toEqual([]);
+  });
+
+  it('skips invalid template names', () => {
+    const result = parseModuleList('nonexistent');
+    expect(result).toEqual([]);
+  });
+
+  it('skips invalid name format', () => {
+    const result = parseModuleList('INVALID');
+    expect(result).toEqual([]);
+  });
+
+  it('skips empty name in name=template', () => {
+    const result = parseModuleList('=server');
+    expect(result).toEqual([]);
   });
 
   it('returns empty array for empty string', () => {

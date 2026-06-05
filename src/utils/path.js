@@ -3,28 +3,13 @@ import { resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DEFAULT_TEMPLATES_DIR = resolve(__dirname, '../../templates');
-
-let globalTemplatesDir = null;
+const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 export const SPEC_CENTER_NAME = 'spec-center';
 export const SPEC_CENTER_SUFFIX = '-spec-center';
 
-export function setGlobalTemplatesDir(dir) {
-  globalTemplatesDir = dir;
-}
-
-export function resetGlobalTemplatesDir() {
-  globalTemplatesDir = null;
-}
-
-export function getGlobalTemplatesDir() {
-  return globalTemplatesDir;
-}
-
 export function resolveTemplatesDir(...subPaths) {
-  const base = globalTemplatesDir || DEFAULT_TEMPLATES_DIR;
-  return resolve(base, ...subPaths);
+  return resolve(TEMPLATES_DIR, ...subPaths);
 }
 
 export function expandHome(inputPath) {

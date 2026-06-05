@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { initCommand } from './commands/init.js';
-import { addCommand } from './commands/add.js';
-import { setGlobalTemplatesDir } from './utils/path.js';
+import { scaffoldCommand } from './commands/scaffold.js';
 import { setVerbose } from './utils/logger.js';
 import { CommandError } from './utils/errors.js';
-import { resolve, dirname, join } from 'path';
+import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
@@ -23,41 +22,15 @@ program
   .name('scaffold')
   .description('Multi-repo workspace scaffold tool')
   .version(pkg.version)
-  .option('--verbose', 'Enable debug output');
-
-program
-  .command('init')
-  .description('Create a new workspace')
-  .option('-n, --name <name>', 'Project name')
-  .option('-d, --dir <path>', 'Workspace directory')
-  .option('-m, --modules <list>', 'Comma-separated modules')
-  .option('--templates-dir <path>', 'Override templates directory')
+  .option('--verbose', 'Enable debug output')
+  .option('-n, --name <name>', 'Project name (init mode)')
+  .option('-d, --dir <path>', 'Workspace directory (init mode)')
+  .option('-m, --modules <list>', 'Modules: "name" or "name=template", comma-separated')
   .option('--dry-run', 'Show what would be created')
   .action(async (options) => {
     if (program.opts().verbose) setVerbose(true);
-    if (options.templatesDir) {
-      warnIfTraversalPath(options.templatesDir, '--templates-dir');
-      setGlobalTemplatesDir(options.templatesDir);
-    }
-    if (options.dir) {
-      warnIfTraversalPath(options.dir, '--dir');
-    }
-    await initCommand(options);
-  });
-
-program
-  .command('add')
-  .description('Add modules to existing workspace')
-  .option('-m, --modules <list>', 'Comma-separated modules to add')
-  .option('--templates-dir <path>', 'Override templates directory')
-  .option('--dry-run', 'Show what would be created')
-  .action(async (options) => {
-    if (program.opts().verbose) setVerbose(true);
-    if (options.templatesDir) {
-      warnIfTraversalPath(options.templatesDir, '--templates-dir');
-      setGlobalTemplatesDir(options.templatesDir);
-    }
-    await addCommand(options);
+    if (options.dir) warnIfTraversalPath(options.dir, '--dir');
+    await scaffoldCommand(options);
   });
 
 program.exitOverride();
