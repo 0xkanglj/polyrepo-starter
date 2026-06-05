@@ -22,6 +22,8 @@ curl -fsSL https://raw.githubusercontent.com/0xkanglj/polyrepo-starter/main/kick
   --modules server,web
 ```
 
+> Add `--dir <path>` to specify a custom workspace directory (default: `./{name}`).
+
 Non-interactive (environment variables):
 
 ```bash

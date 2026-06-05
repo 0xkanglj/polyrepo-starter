@@ -108,6 +108,24 @@ describe('resolveDir', () => {
     }
   });
 
+  it('uses default ./{name} when --name is set without --dir', async () => {
+    const expected = resolve(tempDir.path, 'my-app');
+    const result = await resolveDir(tempDir.path, 'my-app', { name: 'my-app' });
+    expect(result).toBe(expected);
+  });
+
+  it('uses default ./{name} when --modules is set without --dir', async () => {
+    const expected = resolve(tempDir.path, 'my-app');
+    const result = await resolveDir(tempDir.path, 'my-app', { modules: 'server,web' });
+    expect(result).toBe(expected);
+  });
+
+  it('prefers --dir over default when both --dir and --name are set', async () => {
+    const customDir = resolve(tempDir.path, 'custom-location');
+    const result = await resolveDir(tempDir.path, 'my-app', { dir: customDir, name: 'my-app' });
+    expect(result).toBe(customDir);
+  });
+
   it('expands ~ to home directory path', async () => {
     const { homedir } = await import('os');
     // Use ~/nonexistent-subdir so it resolves but doesn't trigger the non-empty check

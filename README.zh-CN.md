@@ -22,6 +22,8 @@ curl -fsSL https://raw.githubusercontent.com/0xkanglj/polyrepo-starter/main/kick
   --modules server,web
 ```
 
+> 添加 `--dir <path>` 可指定自定义工作区目录（默认：`./{name}`）。
+
 非交互模式（环境变量）：
 
 ```bash

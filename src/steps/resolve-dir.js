@@ -19,13 +19,15 @@ export function isDirNonEmpty(dirPath) {
 /**
  * Resolve the workspace directory for init mode.
  * Validates that the target directory either does not exist or is empty.
+ *
+ * When --name or --modules is provided (non-interactive intent),
+ * defaults to ./{name} without prompting.
  */
 export async function resolveDir(cwd, projectName, options) {
-  const rawDir = options.dir
-    ? options.dir
-    : await promptDir(path.join(cwd, projectName));
+  const defaultDir = path.join(cwd, projectName);
+  const rawDir = options.dir || (options.name || options.modules ? defaultDir : null);
 
-  const dir = expandHome(rawDir);
+  const dir = expandHome(rawDir ?? await promptDir(defaultDir));
 
   if (fs.existsSync(dir) && !fs.statSync(dir).isDirectory()) {
     throw new CommandError(`Path "${dir}" exists but is not a directory.`);
