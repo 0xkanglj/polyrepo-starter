@@ -1,4 +1,4 @@
-import { input, checkbox, confirm, select } from '@inquirer/prompts';
+import { input, select } from '@inquirer/prompts';
 import { validateProjectName, SPEC_CENTER_NAME } from './path.js';
 import { getAvailableTemplateNames, validateTemplate } from '../core/templates.js';
 import { warn } from './logger.js';
@@ -32,64 +32,32 @@ export async function promptDir(defaultDir) {
   return answer;
 }
 
-/**
- * 交互式选择模块（用于 init 命令）
- * 展示 templates/ 下除 spec-center 外的所有模块，不含 custom 选项
- * @returns {Promise<Array<{name: string, templateRef: string, isCustom: false}>>}
- */
-export async function promptModules() {
-  const available = getAvailableTemplateNames().filter(
-    (name) => name !== SPEC_CENTER_NAME
-  );
+export function parseModuleList(moduleStr, takenNames = []) {
+  const templates = getAvailableTemplateNames();
+  const results = [];
+  const entries = moduleStr.split(',').map(s => s.trim()).filter(Boolean);
 
-  const selected = await checkbox({
-    message: 'Select modules:',
-    choices: available.map((name) => ({ name, value: name })),
-    required: false,
-  });
+  for (const entry of entries) {
+    const eqIdx = entry.indexOf('=');
+    let name, templateName;
+    if (eqIdx >= 0) {
+      name = entry.slice(0, eqIdx);
+      templateName = entry.slice(eqIdx + 1);
+    } else {
+      name = entry;
+      templateName = entry;
+    }
 
-  return selected.map((name) => ({ name, templateRef: name, isCustom: false }));
-}
+    if (!name) { warn(`Empty name in "${entry}" — skipping`); continue; }
+    const nameValidation = validateProjectName(name);
+    if (nameValidation !== true) { warn(`Invalid name "${name}": ${nameValidation} — skipping`); continue; }
+    if (!templates.includes(templateName) || templateName === 'root') { warn(`Template "${templateName}" not available — skipping "${entry}"`); continue; }
+    if (takenNames.includes(name)) { warn(`Module "${name}" already exists — skipping "${entry}"`); continue; }
 
-/**
- * 解析逗号分隔的模块列表字符串
- * @param {string} moduleStr - 逗号分隔的模块名
- * @returns {Array<{name: string, templateRef: string, isCustom: boolean}>}
- */
-export function parseModuleList(moduleStr) {
-  return moduleStr.split(',')
-    .map(s => s.trim())
-    .filter(name => {
-      if (!name) {
-        warn('Empty module name in list, skipping');
-        return false;
-      }
-      return true;
-    })
-    .map(name => ({ name, templateRef: name, isCustom: false }));
-}
-
-/**
- * 交互式单选一个模块（用于 add 命令）
- * 展示所有模板（排除 spec-center），不区分已存在与否
- * @param {string[]} existingModules - 已有模块名列表（预留，暂不使用）
- * @returns {Promise<{templateName: string}>}
- */
-export async function promptAddOneModule(existingModules) {
-  const templates = getAvailableTemplateNames().filter(
-    (t) => t !== SPEC_CENTER_NAME
-  );
-
-  if (templates.length === 0) {
-    throw new CommandError('No modules available to add.');
+    results.push({ name, templateRef: templateName, isCustom: name !== templateName });
+    takenNames.push(name);
   }
-
-  const templateName = await select({
-    message: 'Select a module to add:',
-    choices: templates.map((t) => ({ name: t, value: t })),
-  });
-
-  return { templateName };
+  return results;
 }
 
 /**
