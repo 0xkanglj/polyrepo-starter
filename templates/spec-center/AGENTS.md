@@ -190,9 +190,6 @@ workspace/
 │   │   ├── http-constitution.md  # HTTP/API design standard (v1.0)
 │   │   ├── observability.md      # Observability convention (v1.0)
 │   │   └── golang/               # Go language-specific conventions
-│   │       ├── go-project.md     # Go project structure convention (v1.0)
-│   │       ├── go-testing.md     # Go testing convention (v1.0)
-│   │       └── go-validation.md  # Go input validation convention (v1.0)
 │   ├── api/                      # API specifications (OpenAPI / endpoint specs)
 │   ├── docs/                     # Cross-module domain specifications
 │   │   └── specs/                # Shared specs affecting 2+ modules

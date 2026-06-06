@@ -12,21 +12,20 @@
 ├── internal/
 │   ├── config/
 │   │   └── config.go
-│   ├── server/
-│   │   ├── server.go
-│   │   └── routes.go
-│   ├── handler/
+│   ├── model/  # domain types, request/response DTOs
 │   │   └── *.go
-│   ├── middleware/
-│   │   ├── auth.go
-│   │   ├── logger.go
-│   │   └── recovery.go
+│   ├── db/  # if using sqlc (generated; do not edit)
 │   ├── repository/
 │   │   └── *.go
 │   ├── service/
 │   │   └── *.go
-│   └── model/
-│       └── *.go
+│   ├── handler/
+│   │   └── *.go
+│   ├── middleware/  # HTTP middleware (auth, logging, recovery)
+│   │   └── *.go
+│   └── server/
+│       ├── server.go
+│       └── routes.go
 ├── pkg/
 │   ├── apperror/
 │   │   └── error.go
@@ -37,7 +36,8 @@
 │   └── validator/
 │       └── validator.go
 ├── db/
-│   └── migrations/
+│   ├── migrations/
+│   └── queries/
 ├── tests/
 │   ├── integration/          # Integration tests (build tag: integration)
 │   └── e2e/                  # End-to-end tests (build tag: e2e)
@@ -45,6 +45,8 @@
 │   ├── specs/
 │   └── plans/
 ├── Makefile
+├── .air.toml                 # air hot-reload config (see go-tools.md)
+├── .golangci.yml             # golangci-lint config (SSOT: spec-center/conventions/golang/)
 ├── .env.example
 ├── .gitignore
 ├── AGENTS.md
@@ -57,7 +59,7 @@
 | Location | Rule | Examples |
 |----------|------|----------|
 | `pkg/` | Safe for import by other Go projects; API must remain stable | apperror, response, database, validator |
-| `internal/` | Project-private; not importable externally | config, server, handler, middleware, repository, service, model |
+| `internal/` | Project-private; not importable externally | config, model, db, repository, service, handler, middleware, server |
 
 **Decision rule:** If a package can be directly `import`-ed and used in another Go service, place it in `pkg/`. If it contains project-specific types or constants, place it in `internal/`.
 
@@ -93,10 +95,23 @@
 
 Cross-layer calls are prohibited: Handlers must not access Repositories directly.
 
+## Middleware (`internal/middleware/`)
+
+- Cross-cutting HTTP concerns: authentication, request logging, panic recovery, and other route-level wrappers.
+- Registered in `internal/server/routes.go` by layer: global → route group → individual route.
+- Must not contain business logic; delegate to service via handler when side effects are needed.
+
+## Domain Models (`internal/model/`)
+
+- Domain entities, value objects, and cross-layer DTOs shared by handler, service, and repository.
+- Repository maps between `internal/db/` (sqlc-generated row types) and `internal/model/` domain types.
+- Handler-only, unexported request structs may stay in the handler package; promote to `internal/model/` when reused across handlers or layers.
+
 ## Related Conventions
 
 | Topic | Document |
 |-------|----------|
+| Dev tools, lint config, Makefile targets | [go-tools.md](go-tools.md) |
 | Testing layout and Makefile targets | [go-testing.md](go-testing.md) |
 | Input validation | [go-validation.md](go-validation.md) |
 | Structured logging | [observability.md](../observability.md) |

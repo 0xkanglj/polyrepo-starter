@@ -287,10 +287,10 @@ For code with goroutines, channels, or shared state:
 
 ## 10. Makefile Targets
 
-Every Go service Makefile MUST provide the targets defined in [testing.md](../testing.md) §11.1:
+Every Go service Makefile MUST provide the targets defined in [testing.md](../testing.md) §11.1 and [go-tools.md](go-tools.md) §3:
 
 ```makefile
-.PHONY: test test-cover test-integration test-e2e check
+.PHONY: test test-cover test-integration test-e2e fmt lint govulncheck check
 
 test:              ## Run unit tests only
 	go test ./...
@@ -305,8 +305,19 @@ test-integration:  ## Run integration tests (requires Docker / DB)
 test-e2e:          ## Run end-to-end tests
 	go test -tags=e2e ./tests/e2e/...
 
-check: fmt lint test
+fmt:               ## Format code (goimports)
+	goimports -w .
+
+lint:              ## Run linter (golangci-lint)
+	golangci-lint run ./...
+
+govulncheck:       ## Scan dependencies for known CVEs
+	govulncheck ./...
+
+check: fmt lint govulncheck test
 ```
+
+See [go-tools.md](go-tools.md) for `dev`, `tools`, `tools-check`, and `release-check` targets.
 
 ## 11. Coverage Commands
 
