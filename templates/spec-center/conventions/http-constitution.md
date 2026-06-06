@@ -102,7 +102,7 @@ X-Request-Id: xxx
 | X-Client-Version | Yes | App version, semantic versioning X.Y.Z | `^\d+\.\d+\.\d+$` | 1.2.0 |
 | X-Client-Language | Yes | Client language, BCP 47 tag | `^[a-z]{2}(-[a-z]{2})?$` | zh-cn |
 
-Missing or invalid headers return HTTP 400 with error code 1001. Non-`/v1/` paths (e.g., `/health`, `/webhooks`) are exempt from validation.
+Missing or invalid headers return HTTP 400 with error code 1001. Non-`/v1/` paths (e.g., `/health`, `/metrics`, `/webhooks`) are exempt from validation.
 
 ## 9. Security
 
@@ -111,6 +111,8 @@ Enforce HTTPS | Input validation | Never return sensitive data | Prevent SQL inj
 ## 10. Observability
 
 Structured logging | Metrics (QPS / latency) | Distributed tracing (traceId)
+
+**Metrics endpoint (`GET /metrics`):** Controlled by `METRICS_PORT`. When `0`, register `/metrics` on the main HTTP server (`PORT`). When non-zero (e.g. `9090`), serve `/metrics` on a dedicated listener at that port. In both modes, `/metrics` is outside the `/v1` prefix and exempt from client header validation.
 
 ## 11. API Versioning
 

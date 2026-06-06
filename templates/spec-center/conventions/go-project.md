@@ -74,7 +74,8 @@
 - Grouped by domain with section comments
 - Middleware applied by layer: global → route group → individual route
 - API version prefix `/v1`
-- Health check routes placed outside the version prefix
+- Health check routes placed outside the version prefix (`/health`)
+- Metrics endpoint (`/metrics`) — see [HTTP Constitution](http-constitution.md) Observability for `METRICS_PORT` behavior
 
 ## Layered Architecture
 
