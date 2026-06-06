@@ -36,7 +36,7 @@
 │   └── validator/
 │       └── validator.go
 ├── db/
-│   ├── migrations/
+│   ├── migrations/           # SQL migrations (golang-migrate; see go-tools.md §2.3)
 │   └── queries/
 ├── tests/
 │   ├── integration/          # Integration tests (build tag: integration)

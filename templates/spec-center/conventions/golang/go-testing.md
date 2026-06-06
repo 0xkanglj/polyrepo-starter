@@ -317,7 +317,7 @@ govulncheck:       ## Scan dependencies for known CVEs
 check: fmt lint govulncheck test
 ```
 
-See [go-tools.md](go-tools.md) for `dev`, `tools`, `tools-check`, and `release-check` targets.
+See [go-tools.md](go-tools.md) for `dev`, `migrate-*`, `tools`, `tools-check`, and `release-check` targets.
 
 ## 11. Coverage Commands
 
