@@ -1,6 +1,8 @@
-# Input Validation Convention v1.0
+# Go Input Validation Convention v1.0
 
 > Applies to: All Go microservices | Goal: Standardize request parameter validation rules, error formats, and implementation patterns
+
+This document extends [HTTP Constitution](../http-constitution.md) §4.2–§4.3 and [error-codes.md](../../errors/error-codes.md) with Go-specific validation rules. The `ValidateStruct` utility lives in `pkg/validator/` (see [go-project.md](go-project.md)).
 
 ## 1. Validation Library
 
@@ -78,7 +80,7 @@ Nickname string `validate:"required,min=1,max=100"`
 Validation failures uniformly return:
 
 - **HTTP Status**: `400 Bad Request`
-- **Business Code**: `1001` (parameter error — see [HTTP Constitution](http-constitution.md) §3 for error code ranges)
+- **Business Code**: `1001` (parameter error — see [error-codes.md](../../errors/error-codes.md) and [HTTP Constitution](../http-constitution.md) §4.3 for error code ranges)
 - **message**: Human-readable field-level error descriptions; multiple errors separated by `; `
 
 **Example:**

@@ -122,7 +122,7 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 | Cross-module implementation plan | **Split** — one plan per module in `<module>/docs/plans/` (see [Implementation Plans](#implementation-plans-cross-module-features)) |
 | Error code and format | `{{PROJECT}}-spec-center/` |
 | Response envelope | `{{PROJECT}}-spec-center/` |
-| Convention documents (HTTP, validation, Go, engineering) | `{{PROJECT}}-spec-center/conventions/` — see [Convention Documents](#convention-documents) |
+| Convention documents (universal + language-specific) | `{{PROJECT}}-spec-center/conventions/` — see [conventions/overview.md](conventions/overview.md) |
 | Retry / circuit-breaker policy | `{{PROJECT}}-spec-center/` |
 | Internal data model (not exposed via API) | Module's `docs/` |
 | Internal algorithm or business logic | Module's `docs/` |
@@ -151,15 +151,7 @@ All modules follow DDD principles:
 
 ### Convention Documents
 
-All convention documents live in `conventions/` and define cross-cutting rules that every module MUST follow:
-
-| Document | Scope | Description |
-|---|---|---|
-| [http-constitution.md](conventions/http-constitution.md) | All HTTP services / APIs | HTTP design standard: method selection, status codes, response structure, pagination, sorting, time format, versioning |
-| [go-validation.md](conventions/go-validation.md) | All Go microservices | Go input validation convention: library selection, field rules, error format, custom validators |
-| [go-project.md](conventions/go-project.md) | All Go backend services | Go project structure convention: directory layout, layered architecture, naming conventions |
-| [engineering-guidelines.md](conventions/engineering-guidelines.md) | All modules & dev tools | LLM/agent coding behavior guidelines: think-before-code, code style, refactoring principles, safety constraints |
-| [conventional-commits.md](conventions/conventional-commits.md) | All modules | Git commit message convention: types, scopes, format |
+All convention documents live in `conventions/`. For the full index of universal and language-specific conventions, see **[conventions/overview.md](conventions/overview.md)**.
 
 ### AGENTS.md Hierarchy
 
@@ -191,11 +183,16 @@ workspace/
 ├── {{PROJECT}}-spec-center/      # SSOT - shared specs and contracts
 │   ├── AGENTS.md                 # This file - global project rules
 │   ├── conventions/              # Shared conventions
+│   │   ├── overview.md           # Convention document index
 │   │   ├── conventional-commits.md  # Git commit message convention
 │   │   ├── engineering-guidelines.md  # LLM/agent coding behavior guidelines
+│   │   ├── testing.md              # Testing convention (v1.0)
 │   │   ├── http-constitution.md  # HTTP/API design standard (v1.0)
-│   │   ├── go-validation.md      # Go input validation convention (v1.0)
-│   │   └── go-project.md         # Go project structure convention (v1.0)
+│   │   ├── observability.md      # Observability convention (v1.0)
+│   │   └── golang/               # Go language-specific conventions
+│   │       ├── go-project.md     # Go project structure convention (v1.0)
+│   │       ├── go-testing.md     # Go testing convention (v1.0)
+│   │       └── go-validation.md  # Go input validation convention (v1.0)
 │   ├── api/                      # API specifications (OpenAPI / endpoint specs)
 │   ├── docs/                     # Cross-module domain specifications
 │   │   └── specs/                # Shared specs affecting 2+ modules

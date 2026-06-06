@@ -6,7 +6,7 @@
 
 - **Consistency**: Follow unified structure and naming conventions
 - **Semantic clarity**: Use HTTP methods and status codes correctly
-- **Observability**: Every request must be traceable (traceId)
+- **Observability**: Every request must be traceable via `X-Request-Id` (see §7.1)
 - **Security**: Never expose internal implementation details
 - **Backward compatibility**: Breaking changes are not allowed
 
@@ -16,10 +16,10 @@
 
 | Method | Semantics | Idempotent |
 |--------|-----------|------------|
-| GET | Retrieve | ✅ |
-| POST | Create / Action | ❌ |
-| PUT | Full / Partial update | ⚠️ |
-| DELETE | Delete | ✅ |
+| GET | Retrieve | Yes |
+| POST | Create / Action | No |
+| PUT | Full / Partial update | Conditional |
+| DELETE | Delete | Yes |
 
 **Prohibited:** `POST /getUser`, `POST /updateUser`, `POST /deleteUser`
 
@@ -27,74 +27,158 @@
 
 **Content-Type:** `application/json; charset=utf-8`
 
-## 3. Unified Response Structure
+## 3. Request Convention
 
-**Success:**
-
-```json
-{ "code": 0, "message": "ok", "data": {} }
-```
-
-**Error:**
-
-```json
-{ "code": 1001, "message": "parameter error", "details": "email invalid" }
-```
-
-**Fields:** code (business code), message (description), data (payload)
-
-**Error Code Ranges:** Parameter errors 1000–1999 | Authentication errors 2000–2999 | Authorization errors 3000–3999 | Business errors 4000–4999 | System errors 5000+
-
-## 4. Request Body Convention
+### 3.1 Request Body
 
 - Request bodies must contain only business data — no extra wrappers (e.g., `{"data": {}}`)
 - PUT = full replacement / partial update
 - Omitting a field = no change; `null` = clear the value
 
-## 5. Field Naming
+### 3.2 Field Naming
 
-- camelCase is mandatory at the API layer (`userName` ✅ `user_name` ❌)
+- camelCase is mandatory at the API layer (`userName` yes; `user_name` no)
 - Mixed naming styles are prohibited
 
-## 6. Pagination
+### 3.3 Time Format (mandatory)
 
-**Offset (default):** `GET /resources?page=1&pageSize=20`
+- **API**: ISO 8601 ending with `Z`, milliseconds recommended (`2026-03-30T20:00:00.123Z`)
+- **Request body**: Same ISO 8601 format required (`"startAt": "2026-03-30T20:00:00Z"`)
+- **Field naming**: createdAt (creation) | updatedAt (update) | deletedAt (soft delete)
+
+Prohibited: `"2026-03-30 12:00:00"` | `"03/30/2026"` | `1711800000` (timestamps prohibited by default)
+
+## 4. Response Structure
+
+### 4.1 Success
+
+```json
+{ "code": 0, "message": "ok", "data": {} }
+```
+
+### 4.2 Error
+
+```json
+{ "code": 1001, "message": "parameter error", "details": "email invalid" }
+```
+
+### 4.3 Error Code Ranges
+
+| Range | Category | HTTP Status Range |
+|-------|----------|-------------------|
+| 1000–1999 | Parameter | 400 |
+| 2000–2999 | Authentication | 401, 403, 409, 429 |
+| 3000–3999 | Authorization | 403 |
+| 4000–4999 | Business | 400, 403, 404, 409 |
+| 5000+ | System | 500 |
+
+See [error-codes.md](../errors/error-codes.md) for the full registry.
+
+### 4.4 Compatibility Principles
+
+- Add fields: allowed
+- Remove fields: prohibited
+- Change types: prohibited
+
+## 5. Pagination
+
+### 5.1 Offset (default)
+
+`GET /resources?page=1&pageSize=20`
 
 ```json
 { "code": 0, "data": { "list": [], "pagination": { "page": 1, "pageSize": 20, "total": 100, "hasMore": true } } }
 ```
 
-Rules: `page` starts at 1, `pageSize` ≤ 100, `hasMore` is required, sorting must be supported
-
 **Sorting:** `GET /resources?sortBy=createdAt&order=desc`
 
-**Cursor (high-performance):** `GET /resources?cursor=xxx&limit=20`
+**Rules:** `page` starts at 1, `pageSize` <= 100, `hasMore` is required. Sorting is optional — the server MAY use a fixed sort order instead of accepting client-specified `sortBy`/`order`.
+
+### 5.2 Cursor (high-performance)
+
+`GET /resources?cursor=xxx&limit=20`
 
 ```json
 { "code": 0, "data": { "list": [], "nextCursor": "xxx", "hasMore": true } }
 ```
 
-**Stable sort required:** `ORDER BY created_at DESC, id DESC`
+### 5.3 Rules
 
-**Prohibited:** No pagination structure, paginated results without sorting, unbounded pageSize
+- **Stable sort required:** `ORDER BY created_at DESC, id DESC`
+- **Prohibited:** No pagination structure, paginated results without sorting, unbounded pageSize
 
-## 7. Database Convention
+## 6. Database Convention
 
-- Naming: snake_case (e.g., `users`, `created_at`, `order_items`)
-- Primary key: `id` (auto-increment or snowflake ID); Timestamps: `created_at`, `updated_at`
-- Offset pagination: `LIMIT :pageSize OFFSET (:page-1)*:pageSize`; Cursor (recommended): `WHERE id < :last_id ORDER BY id DESC LIMIT :limit`
+- **Naming:** snake_case (e.g., `users`, `created_at`, `order_items`)
+- **Primary key:** `id` (auto-increment or snowflake ID); Timestamps: `created_at`, `updated_at`
+- **Offset pagination:** `LIMIT :pageSize OFFSET (:page-1)*:pageSize`; Cursor (recommended): `WHERE id < :last_id ORDER BY id DESC LIMIT :limit`
 - Pagination and sort columns must be indexed
-- Prohibited: Deep pagination (large offset), sorting without indexes
+- **Prohibited:** Deep pagination (large offset), sorting without indexes
 
-## 8. Headers
+### Database Time Storage
+
+Core principle: Database storage must always represent a UTC point in time.
+
+**PostgreSQL (mandatory):**
+
+```sql
+created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
+```
+
+`TIMESTAMP WITHOUT TIME ZONE` is prohibited.
+
+**MySQL (mandatory):**
+
+```sql
+created_at DATETIME(3) NOT NULL
+updated_at DATETIME(3) NOT NULL
+```
+
+- Application layer uses `time.Now().UTC()`, database connection sets `SET TIMEZONE 'UTC'`
+- `TIMESTAMP` type is not recommended (inconsistent automatic timezone conversion, range limited to 1970–2038, many implicit behaviors)
+
+| Feature | PostgreSQL | MySQL |
+|---------|-----------|-------|
+| Recommended type | timestamptz | DATETIME(3) |
+| Stores UTC | Yes | Yes (application-enforced) |
+| Automatic timezone conversion | Yes | Conditional (only for TIMESTAMP) |
+
+### End-to-End Time Flow
+
+Database (UTC session) -> Backend (`time.Now().UTC()`) -> API (ISO 8601 Z) -> Frontend (use as-is)
+
+### Special Cases (exceptions allowed)
+
+- Pure local-time business logic (business hours / calendars): `TIME` type is acceptable
+- High-performance internal APIs: Millisecond timestamps `1711800000000` are acceptable with documented justification
+
+### Time Prohibited
+
+- Storing local time (e.g., `2026-03-30 12:00:00`)
+- Returning times without timezone offset in API responses (e.g., `2026-03-30T12:00:00` without offset)
+- Mixing time formats
+
+## 7. Headers
+
+### 7.1 Correlation Header
+
+```
+X-Request-Id: <uuid>
+```
+
+- **Client responsibility**: If the client sends `X-Request-Id`, the server MUST accept and propagate it. If the client does not send one, the server (or edge gateway) MUST generate one.
+- **Propagation**: The server MUST include `X-Request-Id` in every response header and forward it to all downstream service calls. This is the single correlation ID used across all modules.
+- **Log field**: Map to the `traceId` field in structured logs (see [Observability Convention](observability.md) §5).
+- **Distributed tracing**: When a tracing backend (OpenTelemetry, Jaeger, etc.) is later adopted, the W3C `traceparent` header is added alongside `X-Request-Id`. They serve different purposes — `X-Request-Id` for request correlation, `traceparent` for span-based tracing.
+
+### 7.2 Auth Header
 
 ```text
 Authorization: Bearer <token>
-X-Trace-Id: xxx
-X-Request-Id: xxx
 ```
 
-### Client Request Headers (required for all /v1/ endpoints)
+### 7.3 Client Request Headers (required for all /v1/ endpoints)
 
 | Header | Required | Description | Valid Values | Example |
 |--------|----------|-------------|--------------|---------|
@@ -104,21 +188,7 @@ X-Request-Id: xxx
 
 Missing or invalid headers return HTTP 400 with error code 1001. Non-`/v1/` paths (e.g., `/health`, `/metrics`, `/webhooks`) are exempt from validation.
 
-## 9. Security
-
-Enforce HTTPS | Input validation | Never return sensitive data | Prevent SQL injection / XSS
-
-## 10. Observability
-
-Structured logging | Metrics (QPS / latency) | Distributed tracing (traceId)
-
-**Metrics endpoint (`GET /metrics`):** Controlled by `METRICS_PORT`. When `0`, register `/metrics` on the main HTTP server (`PORT`). When non-zero (e.g. `9090`), serve `/metrics` on a dedicated listener at that port. In both modes, `/metrics` is outside the `/v1` prefix and exempt from client header validation.
-
-## 11. API Versioning
-
-`/v1/users`
-
-## 12. Idempotency
+## 8. Idempotency
 
 > Prevent duplicate write operations caused by network retries (duplicate orders, duplicate customer creation, etc.).
 
@@ -146,90 +216,31 @@ Idempotency-Key: <uuid>
 - The middleware is mounted on the `/v1` route group and applies to all write endpoints.
 - It only activates for requests carrying the `Idempotency-Key` header. GET/HEAD requests are unaffected but not blocked.
 
-## 13. Compatibility Principles
+## 9. Observability
 
-Add fields ✅ | Remove fields ❌ | Change types ❌
+- **Structured logging**: Application-level logging at logic positions (levels, fields, where to log) is defined in [Observability Convention](observability.md).
+- **Correlation**: `X-Request-Id` propagation across all services (see §7.1).
+- **Metrics**: Required for HTTP services (QPS, latency, error rate).
 
-## 14. Prohibited Patterns
+**Metrics endpoint (`GET /metrics`):** Controlled by `METRICS_PORT`. When `0`, register `/metrics` on the main HTTP server (`PORT`). When non-zero (e.g. `9090`), serve `/metrics` on a dedicated listener at that port. In both modes, `/metrics` is outside the `/v1` prefix and exempt from client header validation.
 
-Mixed naming styles | Misuse of POST | Non-standard response structures | Missing traceId | Unpaginated list endpoints
+## 10. API Versioning
 
-## 15. Time Convention
+`/v1/users`
 
-> Goal: Standardize time representation, storage, and transmission to avoid timezone and serialization issues
+## 11. Security
 
-**Core Principles (mandatory):** Always use UTC | API uses ISO 8601 ending with `Z`, milliseconds recommended | Store as TIMESTAMPTZ in the database | No timezone ambiguity
+Enforce HTTPS | Input validation | Never return sensitive data | Prevent SQL injection / XSS
 
-### API Time Format (mandatory)
+## 12. Prohibited Patterns
 
-Format: `YYYY-MM-DDTHH:mm:ss[.SSS]Z`, always UTC (ending with `Z`), milliseconds recommended
+- Mixed naming styles
+- Misuse of POST
+- Non-standard response structures
+- Missing `X-Request-Id` propagation
+- Unpaginated list endpoints
 
-✅ `"createdAt": "2026-03-30T20:00:00.123Z"`
-❌ `"2026-03-30 12:00:00"` | `"03/30/2026"` | `1711800000` (timestamps prohibited by default)
-
-**Field Naming:** createdAt (creation) | updatedAt (update) | deletedAt (soft delete)
-
-### Database Storage
-
-Core principle: Database storage must always represent a UTC point in time
-
-**PostgreSQL (mandatory):**
-
-```sql
-created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
-```
-
-`TIMESTAMP WITHOUT TIME ZONE` is prohibited
-
-**MySQL (mandatory):**
-
-```sql
-created_at DATETIME(3) NOT NULL
-updated_at DATETIME(3) NOT NULL
-```
-
-- Application layer uses `time.Now().UTC()`, database connection sets `SET TIMEZONE 'UTC'`
-- `TIMESTAMP` type is not recommended (inconsistent automatic timezone conversion, range limited to 1970–2038, many implicit behaviors)
-
-**Comparison:**
-
-| Feature | PostgreSQL | MySQL |
-|---------|-----------|-------|
-| Recommended type | timestamptz | DATETIME(3) |
-| Stores UTC | ✅ | ✅ (application-enforced) |
-| Automatic timezone conversion | ✅ | ⚠️ (only for TIMESTAMP) |
-
-### End-to-End Time Flow
-
-Database (UTC session) → Backend (`time.Now().UTC()`) → API (ISO 8601 Z) → Frontend (use as-is)
-
-### Request Body Time
-
-Required: `"startAt": "2026-03-30T20:00:00Z"` ❌ `"2026-03-30 12:00:00"`
-
-### Sorting and Pagination
-
-All paginated queries must use: `ORDER BY created_at DESC, id DESC`
-
-### Special Cases (exceptions allowed)
-
-- Pure local-time business logic (business hours / calendars): `TIME` type is acceptable
-- High-performance internal APIs: Millisecond timestamps `1711800000000` are acceptable with documented justification
-
-### Prohibited
-
-- ❌ Storing local time (e.g., `2026-03-30 12:00:00`)
-- ❌ Returning times without timezone offset in API responses (e.g., `2026-03-30T12:00:00` without offset)
-- ❌ Mixing time formats
-
-### One-Liner
-
-**API: ISO 8601 Z (UTC)** | **PostgreSQL: timestamptz + SET TIMEZONE 'UTC'** | **MySQL: DATETIME(3) + application-enforced UTC**
-
-> Always use UTC. PostgreSQL uses `TIMESTAMP WITH TIME ZONE` with the session timezone set to UTC; the API layer uniformly uses ISO 8601 `Z` format.
-
-## 16. Pre-Launch Checklist
+## 13. Pre-Launch Checklist
 
 - [ ] Standard HTTP methods
 - [ ] Unified response structure
@@ -237,11 +248,12 @@ All paginated queries must use: `ORDER BY created_at DESC, id DESC`
 - [ ] Pagination convention
 - [ ] snake_case database naming
 - [ ] Time format compliance (ISO 8601 + UTC)
-- [ ] traceId
+- [ ] `X-Request-Id` propagation
 - [ ] Logging and monitoring
 - [ ] Complete input validation
 
-## 17. Summary
+## 14. Summary
 
 **Unified structure + correct semantics + stable pagination + observability = production-grade API**
+
 This convention is an organization-wide mandatory standard. All new services must comply; existing systems migrate incrementally.

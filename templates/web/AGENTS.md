@@ -5,6 +5,8 @@ Web application
 
 ## Mandatory Specs
 - [HTTP Constitution](../{{PROJECT}}-spec-center/conventions/http-constitution.md)
+- [Observability Convention](../{{PROJECT}}-spec-center/conventions/observability.md)
+- [Testing Convention](../{{PROJECT}}-spec-center/conventions/testing.md)
 - [Error Codes](../{{PROJECT}}-spec-center/errors/error-codes.md)
 
 ## Key Responsibilities

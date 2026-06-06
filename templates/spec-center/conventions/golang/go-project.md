@@ -37,7 +37,10 @@
 │   └── validator/
 │       └── validator.go
 ├── db/
-|   └── migrations/
+│   └── migrations/
+├── tests/
+│   ├── integration/          # Integration tests (build tag: integration)
+│   └── e2e/                  # End-to-end tests (build tag: e2e)
 ├── docs/
 │   ├── specs/
 │   └── plans/
@@ -45,7 +48,8 @@
 ├── .env.example
 ├── .gitignore
 ├── AGENTS.md
-└── CLAUDE.md
+├── CLAUDE.md
+└── README.md
 ```
 
 ## `internal/` vs `pkg/` Guidelines
@@ -75,7 +79,9 @@
 - Middleware applied by layer: global → route group → individual route
 - API version prefix `/v1`
 - Health check routes placed outside the version prefix (`/health`)
-- Metrics endpoint (`/metrics`) — see [HTTP Constitution](http-constitution.md) Observability for `METRICS_PORT` behavior
+- Metrics endpoint (`/metrics`) — see [HTTP Constitution](../http-constitution.md) §9 for `METRICS_PORT` behavior
+- Request logging middleware (`internal/middleware/logger.go`) — implements [Observability Convention](../observability.md) (traceId, structured fields, entry/exit logging)
+- Input validation via `pkg/validator/` — see [Go Validation Convention](go-validation.md)
 
 ## Layered Architecture
 
@@ -86,3 +92,12 @@
 | Repository | SQL queries, data mapping | Database |
 
 Cross-layer calls are prohibited: Handlers must not access Repositories directly.
+
+## Related Conventions
+
+| Topic | Document |
+|-------|----------|
+| Testing layout and Makefile targets | [go-testing.md](go-testing.md) |
+| Input validation | [go-validation.md](go-validation.md) |
+| Structured logging | [observability.md](../observability.md) |
+| HTTP API design | [http-constitution.md](../http-constitution.md) |
