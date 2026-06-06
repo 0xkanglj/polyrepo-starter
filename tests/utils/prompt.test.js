@@ -9,11 +9,11 @@ vi.mock('@inquirer/prompts', () => ({
 
 describe('parseModuleList', () => {
   it('parses comma-separated module names', () => {
-    const result = parseModuleList('server,web,mobile');
+    const result = parseModuleList('server,web,client');
     expect(result).toEqual([
       { name: 'server', templateRef: 'server', isCustom: false },
       { name: 'web', templateRef: 'web', isCustom: false },
-      { name: 'mobile', templateRef: 'mobile', isCustom: false },
+      { name: 'client', templateRef: 'client', isCustom: false },
     ]);
   });
 

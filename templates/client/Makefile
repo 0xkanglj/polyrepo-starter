@@ -1,10 +1,10 @@
 # ==============================================================================
-# {{PROJECT}}-admin - Makefile
+# {{PROJECT}}-client - Makefile
 # ==============================================================================
 
 # --- Variables ----------------------------------------------------------------
 
-APP_NAME        := {{PROJECT}}-admin
+APP_NAME        := {{PROJECT}}-client
 
 VERSION         ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 COMMIT          ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
@@ -24,7 +24,7 @@ BOLD  := \033[1m
 .PHONY: help
 help: ## Show this help
 	@echo ""
-	@echo "$(BOLD){{PROJECT}}-admin$(RESET)"
+	@echo "$(BOLD){{PROJECT}}-client$(RESET)"
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*?##/ { printf "  $(CYAN)%-20s$(RESET) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo ""

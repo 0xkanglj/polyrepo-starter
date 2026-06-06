@@ -1,6 +1,6 @@
 # Polyrepo Starter
 
-Universal scaffold for multi-repo workspace projects. Generates independent Git repositories (spec-center, server, web, mobile, admin) that share conventions through a single source of truth.
+Universal scaffold for multi-repo workspace projects. Generates independent Git repositories (spec-center, server, web, client) that share conventions through a single source of truth.
 
 **[简体中文](README.zh-CN.md)**
 
@@ -29,7 +29,7 @@ Non-interactive (environment variables):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/0xkanglj/polyrepo-starter/main/kickstart.sh | env \
   PROJECT_NAME=my-project \
-  MODULES="server,web,admin" \
+  MODULES="server,web,client" \
   bash
 ```
 
@@ -75,13 +75,13 @@ node /path/to/polyrepo-starter/src/cli.js [options]
 
 ```bash
 # Built-in modules by name
--m server,web,admin
+-m server,web,client
 
 # Custom name from a template (name=template)
 -m api-gateway=server,user-service=server,web
 
 # Mixed
--m server,my-admin=admin
+-m server,my-app=client
 ```
 
 ### Interactive mode
@@ -101,8 +101,7 @@ Without `-m`, the CLI enters interactive mode:
 | spec-center | Yes (auto-included) | Shared specs and conventions (SSOT) |
 | server | Optional | Backend service |
 | web | Optional | Web application |
-| mobile | Optional | Mobile application |
-| admin | Optional | Admin application |
+| client | Optional | Client application (Android, iOS, desktop) |
 
 ## What Gets Generated
 
@@ -117,8 +116,7 @@ my-project/                           # workspace root (NOT a git repo)
 ├── my-project-spec-center/           → SSOT repo (specs, conventions, error codes)
 ├── my-project-server/                → Backend service repo
 ├── my-project-web/                   → Web application repo
-├── my-project-mobile/                → Mobile application repo
-└── my-project-admin/                 → Admin panel repo
+└── my-project-client/                → Client application repo
 ```
 
 ## Project Name Rules

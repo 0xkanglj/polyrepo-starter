@@ -2,7 +2,7 @@
 
 ## Role
 
-CLI scaffold tool that generates multi-repo workspace projects. Produces independent Git repositories (spec-center, server, web, mobile, admin) sharing conventions through a single source of truth.
+CLI scaffold tool that generates multi-repo workspace projects. Produces independent Git repositories (spec-center, server, web, client) sharing conventions through a single source of truth.
 
 ## Architecture
 
@@ -51,8 +51,7 @@ Templates live in `templates/` and are discovered dynamically:
 | `spec-center/` | SSOT repo (conventions, error codes, API specs, domain docs) |
 | `server/` | Backend service scaffold |
 | `web/` | Web application scaffold |
-| `mobile/` | Mobile application scaffold |
-| `admin/` | Admin panel scaffold |
+| `client/` | Client application scaffold (Android, iOS, desktop) |
 
 Template files use `{{PROJECT}}` as a placeholder. During scaffolding, `copyAndReplace()` replaces all `{{PROJECT}}` occurrences with the actual project name. For custom modules (renamed from a template), it also replaces the template reference name with the custom name and updates the role description.
 
@@ -78,7 +77,7 @@ node src/cli.js [options]
   -h, --help                 Show help
 ```
 
-**Module list syntax**: `server`, `web`, `custom-name=server,admin` — use `name=template` to create a custom-named module from a template.
+**Module list syntax**: `server`, `web`, `custom-name=server,client` — use `name=template` to create a custom-named module from a template.
 
 **Flow (init mode)**: detect mode → resolve name → resolve dir → module loop → review table → dry run check → create workspace root → create each module repo → git init each repo → sync AGENTS.md → print summary.
 

@@ -29,10 +29,10 @@ docs/assets/
 .DS_Store
 Thumbs.db
 
-# Frontend-specific — active
-.next/
-.cache/
+# Client-specific — active
+.dart_tool/
 
-# Frontend-specific (uncomment as needed)
-# .nuxt/
-# .svelte-kit/
+# Client-specific (uncomment as needed)
+# ios/Pods/
+# android/.gradle/
+# android/app/build/

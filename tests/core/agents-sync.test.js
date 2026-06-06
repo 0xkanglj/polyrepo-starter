@@ -14,8 +14,7 @@ const TEMPLATE = `# Spec Center (SSOT)
 
 || Module | Role |
 ||---|---|
-|<!-- MODULE:admin -->| \`admin\` | Admin application|
-|<!-- MODULE:mobile -->| \`mobile\` | Mobile application |
+|<!-- MODULE:client -->| \`client\` | Client application |
 |<!-- MODULE:server -->| \`server\` | Backend service implementation |
 || \`spec-center\` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
 |<!-- MODULE:web -->| \`web\` | Web application|
@@ -43,12 +42,9 @@ workspace/
 <!-- BEGIN MODULE:web -->├── {{PROJECT}}-web/
 │   └── ...
 <!-- END MODULE:web -->
-<!-- BEGIN MODULE:mobile -->├── {{PROJECT}}-mobile/
-│   └── ...
-<!-- END MODULE:mobile -->
-<!-- BEGIN MODULE:admin -->└── {{PROJECT}}-admin/
+<!-- BEGIN MODULE:client -->└── {{PROJECT}}-client/
     └── ...
-<!-- END MODULE:admin -->
+<!-- END MODULE:client -->
 \`\`\`
 `;
 
@@ -56,19 +52,16 @@ describe('filterAgentsMd', () => {
   it('keeps only spec-center when only spec-center selected', () => {
     const result = filterAgentsMd(TEMPLATE, ['spec-center']);
     expect(result).toContain('| `spec-center` |');
-    expect(result).not.toContain('<!-- MODULE:admin -->');
+    expect(result).not.toContain('<!-- MODULE:client -->');
     expect(result).not.toContain('<!-- MODULE:server -->');
     expect(result).not.toContain('<!-- MODULE:web -->');
-    expect(result).not.toContain('<!-- MODULE:mobile -->');
-    expect(result).not.toContain('`admin`');
+    expect(result).not.toContain('`client`');
     expect(result).not.toContain('`server`');
     expect(result).not.toContain('`web`');
-    expect(result).not.toContain('`mobile`');
     expect(result).toContain('SSOT');
     expect(result).not.toContain('{{PROJECT}}-server/');
     expect(result).not.toContain('{{PROJECT}}-web/');
-    expect(result).not.toContain('{{PROJECT}}-mobile/');
-    expect(result).not.toContain('{{PROJECT}}-admin/');
+    expect(result).not.toContain('{{PROJECT}}-client/');
   });
 
   it('keeps selected modules and removes others', () => {
@@ -76,25 +69,21 @@ describe('filterAgentsMd', () => {
     expect(result).toContain('| `spec-center` |');
     expect(result).toContain('| `server` |');
     expect(result).toContain('| `web` |');
-    expect(result).not.toContain('`admin`');
-    expect(result).not.toContain('`mobile`');
+    expect(result).not.toContain('`client`');
     expect(result).toContain('{{PROJECT}}-server/');
     expect(result).toContain('{{PROJECT}}-web/');
-    expect(result).not.toContain('{{PROJECT}}-mobile/');
-    expect(result).not.toContain('{{PROJECT}}-admin/');
+    expect(result).not.toContain('{{PROJECT}}-client/');
   });
 
   it('keeps all content when all modules selected', () => {
-    const result = filterAgentsMd(TEMPLATE, ['spec-center', 'server', 'web', 'mobile', 'admin']);
+    const result = filterAgentsMd(TEMPLATE, ['spec-center', 'server', 'web', 'client']);
     expect(result).toContain('| `spec-center` |');
     expect(result).toContain('| `server` |');
     expect(result).toContain('| `web` |');
-    expect(result).toContain('| `mobile` |');
-    expect(result).toContain('| `admin` |');
+    expect(result).toContain('| `client` |');
     expect(result).toContain('{{PROJECT}}-server/');
     expect(result).toContain('{{PROJECT}}-web/');
-    expect(result).toContain('{{PROJECT}}-mobile/');
-    expect(result).toContain('{{PROJECT}}-admin/');
+    expect(result).toContain('{{PROJECT}}-client/');
   });
 
   it('strips MODULE markers from kept lines', () => {

@@ -13,9 +13,10 @@ describe('templates', () => {
       expect(names).toContain('spec-center');
       expect(names).toContain('server');
       expect(names).toContain('web');
-      expect(names).toContain('mobile');
-      expect(names).toContain('admin');
+      expect(names).toContain('client');
       expect(names).not.toContain('root');
+      expect(names).not.toContain('mobile');
+      expect(names).not.toContain('admin');
     });
   });
 
@@ -30,14 +31,9 @@ describe('templates', () => {
       expect(role).toBe('Web application');
     });
 
-    it('returns Role from mobile template', () => {
-      const role = getModuleRole('mobile');
-      expect(role).toBe('Mobile application');
-    });
-
-    it('returns Role from admin template', () => {
-      const role = getModuleRole('admin');
-      expect(role).toBe('Admin application');
+    it('returns Role from client template', () => {
+      const role = getModuleRole('client');
+      expect(role).toBe('Client application (Android, iOS, desktop)');
     });
   });
 

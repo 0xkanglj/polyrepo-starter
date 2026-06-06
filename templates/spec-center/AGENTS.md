@@ -8,8 +8,7 @@ This project follows a **multi-repo workspace** architecture. Each module is an 
 
 | Module | Role |
 |---|---|
-<!-- MODULE:admin -->| `{{PROJECT}}-admin` | Admin application|
-<!-- MODULE:mobile -->| `{{PROJECT}}-mobile` | Mobile application |
+<!-- MODULE:client -->| `{{PROJECT}}-client` | Client application |
 <!-- MODULE:server -->| `{{PROJECT}}-server` | Server application |
 | `{{PROJECT}}-spec-center` | **Single Source of Truth (SSOT)** for cross-module contracts and constraints |
 <!-- MODULE:web -->| `{{PROJECT}}-web` | Web application|
@@ -81,7 +80,7 @@ Cross-module **specs** live in `{{PROJECT}}-spec-center/docs/specs/`; cross-modu
 1. **Shared spec first** — Write and approve the cross-module spec in `{{PROJECT}}-spec-center` (API schemas, acceptance criteria, error codes).
 2. **Split plans by module** — Create one plan per module that implements the feature. Use the same date + feature slug (e.g. `2026-06-01-feature.md`) for discoverability.
 3. **Declare dependencies** — Each plan MUST link to the SSOT spec and, when applicable, state `Depends on: <other-module-plan>` (e.g. web plan depends on server plan).
-4. **Execute in dependency order** — Typically `{{PROJECT}}-server` → `{{PROJECT}}-web` → `{{PROJECT}}-mobile`. A downstream plan MUST NOT assume upstream API changes exist until the upstream plan is merged or verified.
+4. **Execute in dependency order** — Typically `{{PROJECT}}-server` → `{{PROJECT}}-web` → `{{PROJECT}}-client`. A downstream plan MUST NOT assume upstream API changes exist until the upstream plan is merged or verified.
 5. **No canonical plans in agent temp paths** — Module plans belong in `<module>/docs/plans/`, not in `docs/superpowers/plans/` or other agent-only directories. Agent-generated drafts may start elsewhere but MUST be moved to the module path before execution.
 
 **When a single cross-module plan is acceptable (rare):** Only for small, atomic changes that must land in one PR and touch ≤2 modules with no meaningful dependency boundary (e.g. a one-field DTO addition + one UI column). Prefer split plans when in doubt.
@@ -215,16 +214,10 @@ workspace/
 │       ├── specs/                # Web-specific specifications
 │       └── plans/                # Web-specific implementation plans
 <!-- END MODULE:web -->
-<!-- BEGIN MODULE:mobile -->├── {{PROJECT}}-mobile/           # Mobile application
-│   ├── AGENTS.md                 # Mobile-specific conventions
-│   └── docs/
-│       ├── specs/                # Mobile-specific specifications
-│       └── plans/                # Mobile-specific implementation plans
-<!-- END MODULE:mobile -->
-<!-- BEGIN MODULE:admin -->└── {{PROJECT}}-admin/            # Admin application
-    ├── AGENTS.md                 # Admin-specific conventions
+<!-- BEGIN MODULE:client -->└── {{PROJECT}}-client/           # Client application
+    ├── AGENTS.md                 # Client-specific conventions
     └── docs/
-        ├── specs/                # Admin-specific specifications
-        └── plans/                # Admin-specific implementation plans
-<!-- END MODULE:admin -->
+        ├── specs/                # Client-specific specifications
+        └── plans/                # Client-specific implementation plans
+<!-- END MODULE:client -->
 ```

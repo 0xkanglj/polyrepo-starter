@@ -40,6 +40,7 @@ describe('scaffold command — init mode', () => {
     expect(agentsContent).not.toContain('`web`');
     expect(agentsContent).not.toContain('`mobile`');
     expect(agentsContent).not.toContain('`admin`');
+    expect(agentsContent).not.toContain('`client`');
   });
 
   it('creates workspace with multiple modules (non-interactive)', () => {
@@ -54,12 +55,14 @@ describe('scaffold command — init mode', () => {
     expect(existsSync(resolve(workspace, 'myapp-web'))).toBe(true);
     expect(existsSync(resolve(workspace, 'myapp-mobile'))).toBe(false);
     expect(existsSync(resolve(workspace, 'myapp-admin'))).toBe(false);
+    expect(existsSync(resolve(workspace, 'myapp-client'))).toBe(false);
 
     const agentsContent = readFileSync(resolve(workspace, 'myapp-spec-center', 'AGENTS.md'), 'utf-8');
     expect(agentsContent).toContain('| `myapp-server`');
     expect(agentsContent).toContain('| `myapp-web`');
     expect(agentsContent).not.toContain('| `myapp-mobile`');
     expect(agentsContent).not.toContain('| `myapp-admin`');
+    expect(agentsContent).not.toContain('| `myapp-client`');
   });
 
   it('creates workspace with name=template syntax', () => {

@@ -1,6 +1,6 @@
 # Polyrepo Starter
 
-多仓库工作区项目通用脚手架。生成独立的 Git 仓库（spec-center、server、web、mobile、admin），通过单一事实来源（SSOT）共享规范与约定。
+多仓库工作区项目通用脚手架。生成独立的 Git 仓库（spec-center、server、web、client），通过单一事实来源（SSOT）共享规范与约定。
 
 **[English](README.md)**
 
@@ -29,7 +29,7 @@ curl -fsSL https://raw.githubusercontent.com/0xkanglj/polyrepo-starter/main/kick
 ```bash
 curl -fsSL https://raw.githubusercontent.com/0xkanglj/polyrepo-starter/main/kickstart.sh | env \
   PROJECT_NAME=my-project \
-  MODULES="server,web,admin" \
+  MODULES="server,web,client" \
   bash
 ```
 
@@ -75,13 +75,13 @@ node /path/to/polyrepo-starter/src/cli.js [选项]
 
 ```bash
 # 按名称指定内置模块
--m server,web,admin
+-m server,web,client
 
 # 自定义名称基于模板（名称=模板）
 -m api-gateway=server,user-service=server,web
 
 # 混合使用
--m server,my-admin=admin
+-m server,my-app=client
 ```
 
 ### 交互模式
@@ -101,8 +101,7 @@ node /path/to/polyrepo-starter/src/cli.js [选项]
 | spec-center | 必选（自动包含） | 共享规范与约定（SSOT） |
 | server | 可选 | 后端服务 |
 | web | 可选 | Web 应用 |
-| mobile | 可选 | 移动端应用 |
-| admin | 可选 | 管理后台 |
+| client | 可选 | 客户端应用（Android、iOS、desktop） |
 
 ## 生成目录结构
 
@@ -117,8 +116,7 @@ my-project/                           # 工作区根目录（非 Git 仓库）
 ├── my-project-spec-center/           → SSOT 仓库（规范、约定、错误码）
 ├── my-project-server/                → 后端服务仓库
 ├── my-project-web/                   → Web 应用仓库
-├── my-project-mobile/                → 移动端应用仓库
-└── my-project-admin/                 → 管理后台仓库
+└── my-project-client/                → 客户端应用仓库
 ```
 
 ## 项目名称规则

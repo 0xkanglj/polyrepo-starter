@@ -1,7 +1,7 @@
-# {{PROJECT}}-admin
+# {{PROJECT}}-client
 
 ## Role
-Admin application
+Client application (Android, iOS, desktop)
 
 ## Mandatory Specs
 - [HTTP Constitution](../{{PROJECT}}-spec-center/conventions/http-constitution.md)
