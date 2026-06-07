@@ -1,3 +1,6 @@
+# Reference config for Go services — copy to service repo root as sqlc.yaml
+# Spec: ../go-tools.md §2.4
+
 version: "2"
 
 sql:

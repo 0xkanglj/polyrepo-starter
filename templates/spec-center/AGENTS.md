@@ -189,7 +189,7 @@ workspace/
 │   │   ├── testing.md              # Testing convention (v1.0)
 │   │   ├── http-constitution.md  # HTTP/API design standard (v1.0)
 │   │   ├── observability.md      # Observability convention (v1.0)
-│   │   └── golang/               # Go language-specific conventions
+│   │   └── golang/               # Go conventions; examples/ = reference configs
 │   ├── api/                      # API specifications (OpenAPI / endpoint specs)
 │   ├── docs/                     # Cross-module domain specifications
 │   │   └── specs/                # Shared specs affecting 2+ modules

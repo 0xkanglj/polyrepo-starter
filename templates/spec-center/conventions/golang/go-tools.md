@@ -29,11 +29,11 @@ Every Go service MUST keep these files at the repository root:
 └── Makefile
 ```
 
-The SSOT templates live in `{{PROJECT}}-spec-center/conventions/golang/`. Copy or sync them into each Go service at init time; update the service copy when the SSOT changes.
+**Reference configs** (normative examples, not convention documents) live in `{{PROJECT}}-spec-center/conventions/golang/examples/`. When a service adopts the Go stack, copy them to the service repository root and adjust paths (e.g. `cmd` entrypoint) as needed. The generic `server` scaffold does not include these files — they apply only to Go backends.
 
 ### 2.1 `.air.toml`
 
-Template: [`.air.toml`](.air.toml)
+Reference: [`examples/.air.toml`](examples/.air.toml)
 
 | Section | Key settings | Purpose |
 |---------|--------------|---------|
@@ -54,7 +54,7 @@ Adjust `cmd` / `bin` if the entry point is not `cmd/server/main.go`.
 
 ### 2.2 `.golangci.yml`
 
-Template: [`.golangci.yml`](.golangci.yml)
+Reference: [`examples/.golangci.yml`](examples/.golangci.yml)
 
 Uses **golangci-lint v2** config format (`version: "2"`).
 
@@ -164,7 +164,7 @@ make migrate-create NAME=add_email_index
 
 Uses [sqlc](https://sqlc.dev/) to generate type-safe database access code from SQL. Query files live in `db/queries/`; generated Go code goes to `internal/db/` (see [go-project.md](go-project.md)). Schema is derived from `db/migrations/` — run migrations (or add migration files) before generating.
 
-Template: [`sqlc.yaml`](sqlc.yaml)
+Reference: [`examples/sqlc.yaml`](examples/sqlc.yaml)
 
 #### Layout
 

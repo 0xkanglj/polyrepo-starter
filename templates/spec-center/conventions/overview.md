@@ -29,3 +29,5 @@ They are organized in subdirectories under `conventions/` and MUST be listed in 
 | [go-tools.md](golang/go-tools.md) | All Go backend services | Go dev tools convention: air, golangci-lint, goimports, govulncheck, migrate, config files, Makefile targets |
 | [go-testing.md](golang/go-testing.md) | All Go backend services | Go testing convention: table-driven tests, httptest, build tags, interface-based mocks, coverage commands |
 | [go-validation.md](golang/go-validation.md) | All Go microservices | Go input validation convention: library selection, field rules, error format, custom validators |
+
+**Reference configs** (not convention documents): `golang/examples/` holds normative configuration examples (`.air.toml`, `.golangci.yml`, `sqlc.yaml`) for Go backends. Copy to the service repository root when adopting the Go stack; see [go-tools.md](golang/go-tools.md) §2.

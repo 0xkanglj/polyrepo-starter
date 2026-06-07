@@ -1,5 +1,5 @@
-# air hot-reload config — SSOT template for Go services
-# Docs: go-tools.md §2.1
+# Reference config for Go services — copy to service repo root as .air.toml
+# Spec: ../go-tools.md §2.1
 
 root = "."
 tmp_dir = "tmp"

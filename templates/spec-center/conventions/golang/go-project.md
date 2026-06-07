@@ -45,8 +45,9 @@
 │   ├── specs/
 │   └── plans/
 ├── Makefile
-├── .air.toml                 # air hot-reload config (see go-tools.md)
-├── .golangci.yml             # golangci-lint config (SSOT: spec-center/conventions/golang/)
+├── .air.toml                 # air hot-reload config (copy from go-tools.md examples/)
+├── .golangci.yml             # golangci-lint config (copy from go-tools.md examples/)
+├── sqlc.yaml                 # sqlc config (copy from go-tools.md examples/)
 ├── .env.example
 ├── .gitignore
 ├── AGENTS.md
