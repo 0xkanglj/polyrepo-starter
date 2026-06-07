@@ -3,10 +3,14 @@ import { resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEMPLATES_DIR = resolve(__dirname, '../../templates');
+let TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 export const SPEC_CENTER_NAME = 'spec-center';
 export const SPEC_CENTER_SUFFIX = '-spec-center';
+
+export function setTemplatesDir(dir) {
+  TEMPLATES_DIR = dir;
+}
 
 export function resolveTemplatesDir(...subPaths) {
   return resolve(TEMPLATES_DIR, ...subPaths);
