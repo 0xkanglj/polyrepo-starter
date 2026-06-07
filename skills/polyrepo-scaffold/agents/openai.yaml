@@ -1,0 +1,8 @@
+name: polyrepo-scaffold
+description: Scaffold multi-repo workspace projects using polyrepo-starter
+triggers:
+  - create a new project
+  - scaffold a workspace
+  - initialize a polyrepo structure
+  - add modules to an existing workspace
+  - set up a multi-repo project
