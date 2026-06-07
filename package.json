@@ -14,7 +14,8 @@
   },
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build-skill": "mkdir -p skills/polyrepo-scaffold/scripts skills/polyrepo-scaffold/assets && rm -rf skills/polyrepo-scaffold/scripts/src skills/polyrepo-scaffold/assets/templates && cp -r src skills/polyrepo-scaffold/scripts/src && cp -r templates skills/polyrepo-scaffold/assets/templates && cp package.json package-lock.json skills/polyrepo-scaffold/scripts/src/"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.0.0",
