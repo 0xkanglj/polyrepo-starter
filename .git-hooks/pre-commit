@@ -1,0 +1,9 @@
+#!/bin/sh
+# Auto-sync skill build output before each commit.
+# Run `npm run setup-hooks` once after clone to activate.
+set -e
+
+echo "[pre-commit] Syncing skill build output..."
+npm run build-skill --silent
+git add skills/
+echo "[pre-commit] Done."
