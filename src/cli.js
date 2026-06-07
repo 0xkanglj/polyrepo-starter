@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { program } from 'commander';
+import { program, Option } from 'commander';
 import { scaffoldCommand } from './commands/scaffold.js';
 import { setVerbose } from './utils/logger.js';
+import { setTemplatesDir } from './utils/path.js';
 import { CommandError } from './utils/errors.js';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -27,8 +28,10 @@ program
   .option('-d, --dir <path>', 'Workspace directory (init mode)')
   .option('-m, --modules <list>', 'Modules: "name" or "name=template", comma-separated')
   .option('--dry-run', 'Show what would be created')
+  .addOption(new Option('--templates-dir <path>', '').hideHelp())
   .action(async (options) => {
     if (program.opts().verbose) setVerbose(true);
+    if (options.templatesDir) setTemplatesDir(resolve(options.templatesDir));
     if (options.dir) warnIfTraversalPath(options.dir, '--dir');
     await scaffoldCommand(options);
   });
