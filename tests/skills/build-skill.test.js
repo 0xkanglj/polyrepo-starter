@@ -17,7 +17,7 @@ describe('build-skill script', () => {
     expect(existsSync(resolve(skillDir, 'SKILL.md'))).toBe(true);
     expect(existsSync(resolve(skillDir, 'scripts/run.sh'))).toBe(true);
     expect(existsSync(resolve(skillDir, 'scripts/src/cli.js'))).toBe(true);
-    expect(existsSync(resolve(skillDir, 'scripts/src/package.json'))).toBe(true);
+    expect(existsSync(resolve(skillDir, 'scripts/package.json'))).toBe(true);
     expect(existsSync(resolve(skillDir, 'assets/templates/spec-center'))).toBe(true);
 
     const runShStat = lstatSync(resolve(skillDir, 'scripts/run.sh'));

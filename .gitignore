@@ -20,3 +20,6 @@ skills/*/scripts/src/
 skills/*/assets/templates/
 skills/*/scripts/src/package.json
 skills/*/scripts/src/package-lock.json
+skills/*/scripts/package.json
+skills/*/scripts/package-lock.json
+skills/*/scripts/node_modules/
