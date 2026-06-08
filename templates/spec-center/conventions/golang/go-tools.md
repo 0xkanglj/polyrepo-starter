@@ -387,5 +387,6 @@ Main branch adds `test-e2e` after integration tests. `make lint` and `make govul
 | Topic | Document |
 |-------|----------|
 | Project layout | [go-project.md](go-project.md) |
+| Style and idioms | [go-style.md](go-style.md) |
 | Test Makefile targets | [go-testing.md](go-testing.md) |
 | Universal Makefile targets | [testing.md](../testing.md) §11.1 |

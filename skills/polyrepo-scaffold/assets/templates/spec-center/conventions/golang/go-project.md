@@ -112,6 +112,7 @@ Cross-layer calls are prohibited: Handlers must not access Repositories directly
 
 | Topic | Document |
 |-------|----------|
+| Go style, naming, idioms | [go-style.md](go-style.md) |
 | Dev tools, lint config, Makefile targets | [go-tools.md](go-tools.md) |
 | Testing layout and Makefile targets | [go-testing.md](go-testing.md) |
 | Input validation | [go-validation.md](go-validation.md) |

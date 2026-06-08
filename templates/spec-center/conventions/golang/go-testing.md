@@ -2,7 +2,7 @@
 
 > Applies to: All Go backend services | Goal: Standardize Go-specific testing patterns, tools, and implementation details
 
-This document is a companion to [testing.md](../testing.md) (the generic testing convention). It defines Go-specific rules and patterns that all Go services MUST follow.
+This document is a companion to [testing.md](../testing.md) (the generic testing convention) and [go-style.md](go-style.md) (idioms and error handling). It defines Go-specific rules and patterns that all Go services MUST follow.
 
 ## 1. Test File Organization
 

@@ -9,6 +9,7 @@ Server application
 - [Error Codes](../{{PROJECT}}-spec-center/errors/error-codes.md)
 - [Testing Convention](../{{PROJECT}}-spec-center/conventions/testing.md)
 - [Go Project Structure](../{{PROJECT}}-spec-center/conventions/golang/go-project.md)
+- [Go Style and Idioms](../{{PROJECT}}-spec-center/conventions/golang/go-style.md)
 - [Go Testing Convention](../{{PROJECT}}-spec-center/conventions/golang/go-testing.md)
 - [Go Validation Convention](../{{PROJECT}}-spec-center/conventions/golang/go-validation.md)
 

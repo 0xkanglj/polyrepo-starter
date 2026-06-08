@@ -25,7 +25,8 @@ They are organized in subdirectories under `conventions/` and MUST be listed in 
 
 | Document | Scope | Description |
 |---|---|---|
-| [go-project.md](golang/go-project.md) | All Go backend services | Go project structure convention: directory layout, layered architecture, naming conventions |
+| [go-project.md](golang/go-project.md) | All Go backend services | Go project structure convention: directory layout, layered architecture |
+| [go-style.md](golang/go-style.md) | All Go backend services | Go style and idioms: naming, control flow, errors, interfaces, concurrency (based on Effective Go) |
 | [go-tools.md](golang/go-tools.md) | All Go backend services | Go dev tools convention: air, golangci-lint, goimports, govulncheck, migrate, config files, Makefile targets |
 | [go-testing.md](golang/go-testing.md) | All Go backend services | Go testing convention: table-driven tests, httptest, build tags, interface-based mocks, coverage commands |
 | [go-validation.md](golang/go-validation.md) | All Go microservices | Go input validation convention: library selection, field rules, error format, custom validators |

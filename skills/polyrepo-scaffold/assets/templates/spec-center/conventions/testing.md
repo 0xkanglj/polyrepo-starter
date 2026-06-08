@@ -34,6 +34,7 @@ For the full convention index, see [overview.md](overview.md).
 Language-specific file organization, naming, and patterns are defined in dedicated convention documents:
 
 - Go: [go-testing.md](golang/go-testing.md) — Makefile targets, build tags, httptest patterns
+- Go: [go-style.md](golang/go-style.md) — naming, errors, interfaces, concurrency idioms
 - Go: [go-tools.md](golang/go-tools.md) — lint, format, vulnerability scan, hot reload, SQL migrations
 
 Web and client modules: follow the framework's convention (co-located test files or a mirrored directory), stay consistent within the module, and still comply with §2–§12 of this document.
