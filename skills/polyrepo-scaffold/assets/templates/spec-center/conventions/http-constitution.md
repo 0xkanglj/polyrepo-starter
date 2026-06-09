@@ -184,7 +184,7 @@ Authorization: Bearer <token>
 |--------|----------|-------------|--------------|---------|
 | X-Client-Platform | Yes | Client platform | ios, android, web | ios |
 | X-Client-Version | Yes | App version, semantic versioning X.Y.Z | `^\d+\.\d+\.\d+$` | 1.2.0 |
-| X-Client-Language | Yes | Client language, BCP 47 tag | `^[a-z]{2}(-[a-z]{2})?$` | zh-cn |
+| X-Client-Language | Yes | Client language, BCP 47 tag | `^[a-z]{2}(-[A-Z]{2})?$` | zh-CN |
 
 Missing or invalid headers return HTTP 400 with error code 1001. Non-`/v1/` paths (e.g., `/health`, `/metrics`, `/webhooks`) are exempt from validation.
 
